@@ -603,6 +603,11 @@ footer{
   <a href="#pricing" class="nav-cta">Get Pro — R199</a>
 </nav>
 
+<!-- COMPATIBILITY NOTICE -->
+<div style="background:#1a1a2e;color:rgba(255,255,255,0.75);text-align:center;padding:10px 20px;font-size:12px;font-family:'DM Mono',monospace;letter-spacing:.03em;border-bottom:1px solid rgba(255,255,255,0.08)">
+  ⚠️ &nbsp;Currently compatible with <strong style="color:#fff">Windows only</strong> · Requires <strong style="color:#fff">VS Code</strong> + <strong style="color:#fff">Microsoft Edge or Chrome</strong> · Mac / iOS support coming soon
+</div>
+
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
@@ -822,6 +827,30 @@ footer{
     <h2 class="section-title">Up and running in 5 minutes.</h2>
     <p class="section-sub">Two things to install — the browser extension and the VS Code extension.</p>
 
+    <!-- SYSTEM REQUIREMENTS BOX -->
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:24px 28px;margin-top:40px;margin-bottom:8px">
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">💻</span> System Requirements
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div>
+          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Operating System</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:2px">Windows 10 or 11</div>
+          <div style="font-size:12px;color:#888">Mac / iOS — coming soon</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Browser</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:2px">Microsoft Edge or Chrome</div>
+          <div style="font-size:12px;color:#888">Firefox not supported yet</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Storage Required</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:2px">~800MB free space</div>
+          <div style="font-size:12px;color:#888">VS Code ~350MB · Node.js ~300MB · Extensions ~5MB</div>
+        </div>
+      </div>
+    </div>
+
     <div class="install-tabs">
       <button class="install-tab active" onclick="switchTab('browser')">1. Browser Extension</button>
       <button class="install-tab" onclick="switchTab('vscode')">2. VS Code Extension</button>
@@ -832,9 +861,9 @@ footer{
         <div class="install-step">
           <div class="install-step-num">1</div>
           <div>
-            <div class="install-step-title">Download the extension</div>
-            <div class="install-step-desc">Download the Guidance browser extension zip file below.</div>
-            <a href="#" class="download-btn">
+            <div class="install-step-title">Download the browser extension</div>
+            <div class="install-step-desc">Download the Guidance browser extension zip file. File size is approximately 20KB.</div>
+            <a href="https://github.com/KelTech-ZA/Guidance/raw/main/BROWSER-guidance-extension.zip" class="download-btn">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5M2.5 11.5h9" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
               Download Browser Extension
             </a>
@@ -844,21 +873,28 @@ footer{
           <div class="install-step-num">2</div>
           <div>
             <div class="install-step-title">Unzip the file</div>
-            <div class="install-step-desc">Right-click the downloaded zip → <code>Extract All</code> → Extract. You'll get a folder called <code>BROWSER-guidance-extension</code>.</div>
+            <div class="install-step-desc">Right-click the downloaded zip → <code>Extract All</code> → <code>Extract</code>. Move the extracted folder somewhere permanent like <code>C:\Users\YourName\guidance-browser</code>. Do not delete this folder after installing.</div>
           </div>
         </div>
         <div class="install-step">
           <div class="install-step-num">3</div>
           <div>
             <div class="install-step-title">Load into Edge or Chrome</div>
-            <div class="install-step-desc">Open <code>edge://extensions</code> or <code>chrome://extensions</code> → Turn on <code>Developer mode</code> → Click <code>Load unpacked</code> → Select the extracted folder.</div>
+            <div class="install-step-desc">Open <code>edge://extensions</code> or <code>chrome://extensions</code> → Toggle <code>Developer mode</code> ON → Click <code>Load unpacked</code> → Select the extracted folder → Click <code>Select Folder</code>.</div>
           </div>
         </div>
         <div class="install-step">
           <div class="install-step-num">4</div>
           <div>
             <div class="install-step-title">Pin Guidance to your toolbar</div>
-            <div class="install-step-desc">Click the puzzle piece icon in your toolbar → find Guidance → click the pin icon to keep it visible.</div>
+            <div class="install-step-desc">Click the puzzle piece 🧩 icon in your browser toolbar → Find <strong>Guidance — Visual Coding Co-pilot</strong> → Click the pin icon. The Guidance icon will now appear in your toolbar permanently.</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">5</div>
+          <div>
+            <div class="install-step-title">Activate Pro (if purchased)</div>
+            <div class="install-step-desc">Click the Guidance icon in your toolbar → Go to the <strong>Settings</strong> tab → Paste your licence key in the <strong>Activate Pro</strong> box → Click <strong>Activate</strong>. Pro features unlock immediately.</div>
           </div>
         </div>
       </div>
@@ -869,23 +905,23 @@ footer{
         <div class="install-step">
           <div class="install-step-num">1</div>
           <div>
-            <div class="install-step-title">Install VS Code (if not already)</div>
-            <div class="install-step-desc">Download VS Code free from <code>code.visualstudio.com</code>. It's the editor where Guidance will show your highlights.</div>
+            <div class="install-step-title">Install VS Code (required)</div>
+            <div class="install-step-desc">Guidance requires VS Code as your code editor — it cannot work with Notepad++ or other editors. Download VS Code free from <code>code.visualstudio.com</code>. It requires approximately 350MB of free space.</div>
           </div>
         </div>
         <div class="install-step">
           <div class="install-step-num">2</div>
           <div>
-            <div class="install-step-title">Install Node.js (if not already)</div>
-            <div class="install-step-desc">Download the LTS version from <code>nodejs.org</code>. This is required for the Guidance VS Code extension to run.</div>
+            <div class="install-step-title">Install Node.js (required)</div>
+            <div class="install-step-desc">Download the LTS version from <code>nodejs.org</code>. Choose the Windows installer. This requires approximately 300MB of free space. If you already have Node.js installed, skip this step.</div>
           </div>
         </div>
         <div class="install-step">
           <div class="install-step-num">3</div>
           <div>
-            <div class="install-step-title">Download and install the VS Code extension</div>
-            <div class="install-step-desc">Download the VS Code extension below, unzip it, open VS Code terminal and run the install command included in the README.</div>
-            <a href="#" class="download-btn">
+            <div class="install-step-title">Download the VS Code extension</div>
+            <div class="install-step-desc">Download the Guidance VS Code extension zip file below. File size is approximately 10KB.</div>
+            <a href="https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" class="download-btn">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5M2.5 11.5h9" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
               Download VS Code Extension
             </a>
@@ -894,8 +930,25 @@ footer{
         <div class="install-step">
           <div class="install-step-num">4</div>
           <div>
+            <div class="install-step-title">Install the VS Code extension</div>
+            <div class="install-step-desc">Unzip the downloaded file. Open VS Code → press <code>Ctrl+`</code> to open the Terminal → run these two commands one at a time:<br><br>
+            <code>xcopy /e /i /y "C:\Users\YourName\Downloads\VSCODE-guidance-extension-NEW" "C:\Users\YourName\.vscode\extensions\guidance-vscode"</code><br><br>
+            Then: <code>cd "%USERPROFILE%\.vscode\extensions\guidance-vscode" && npm install ws</code><br><br>
+            Close and reopen VS Code. You'll see <strong>Guidance: ready</strong> in the bottom status bar.</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">5</div>
+          <div>
             <div class="install-step-title">Open your project in VS Code</div>
-            <div class="install-step-desc">In VS Code: <code>File → Open Folder</code> → select your project folder. You'll see <code>Guidance: ready</code> in the status bar at the bottom.</div>
+            <div class="install-step-desc">In VS Code: <code>File → Open Folder</code> → select your project folder. The status bar at the bottom will show <strong>Guidance: browser connected</strong> once you also have the browser extension running on a ChatGPT, Claude, Grok or Gemini tab.</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">6</div>
+          <div>
+            <div class="install-step-title">Assign project colours (optional)</div>
+            <div class="install-step-desc">To colour-code your project tabs: press <code>Ctrl+Shift+P</code> in VS Code → type <code>Guidance: Assign Colour</code> → select your project → pick a colour. Your VS Code title bar and tabs will update immediately.</div>
           </div>
         </div>
       </div>
@@ -910,7 +963,17 @@ footer{
     <h2 class="section-title">Common questions</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Do I need to know how to code to use Guidance? <span class="arrow">▼</span></button>
+        <button class="faq-q" onclick="toggleFaq(this)">Does Guidance work on Mac or iOS? <span class="arrow">▼</span></button>
+        <div class="faq-a">Not yet. Guidance currently supports Windows 10 and Windows 11 only. Mac and iOS support is planned for a future release. We'll announce it on this page when it's available.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Do I need to download VS Code? Can I use Notepad++ instead? <span class="arrow">▼</span></button>
+        <div class="faq-a">Yes — VS Code is required. Guidance cannot work with Notepad++ or other editors because it needs to communicate directly with the editor to show highlights. VS Code is free and opens all the same file types as Notepad++. Switching takes about 5 minutes and your files stay exactly the same.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How much storage space do I need? <span class="arrow">▼</span></button>
+        <div class="faq-a">You need approximately 800MB of free space total: VS Code (~350MB), Node.js (~300MB), and the Guidance extensions themselves (~5MB combined). If you already have VS Code and Node.js installed, you only need 5MB for the extensions themselves.</div>
+      </div>
         <div class="faq-a">No. Guidance is built specifically for people who use AI to write code but struggle with where to apply the changes. You don't need to understand the code — Guidance just shows you exactly where to paste it.</div>
       </div>
       <div class="faq-item">
