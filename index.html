@@ -412,7 +412,7 @@ section{padding:96px 48px}
   letter-spacing:.06em;
 }
 .price-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;opacity:0.6;margin-bottom:8px}
-.price-amount{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;margin-bottom:4px;line-height:1}
+.price-amount{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;margin-bottom:4px;line-height:1;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1}
 .price-period{font-size:13px;opacity:0.5;margin-bottom:24px}
 .price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
 .price-features li{font-size:13px;display:flex;align-items:center;gap:8px;opacity:0.75}
@@ -598,6 +598,7 @@ footer{
     <a href="#features">Features</a>
     <a href="#install">Install</a>
     <a href="#pricing">Pricing</a>
+    <a href="#reviews">Reviews</a>
     <a href="#faq">FAQ</a>
   </div>
   <a href="#pricing" class="nav-cta">Get Pro — R199</a>
@@ -1004,6 +1005,86 @@ footer{
   </div>
 </section>
 
+<!-- REVIEWS -->
+<section style="background:var(--paper);padding:96px 48px" id="reviews">
+  <div style="max-width:900px;margin:0 auto">
+    <div class="section-label">Reviews</div>
+    <h2 class="section-title">What users are saying.</h2>
+    <p class="section-sub" style="margin-bottom:24px">Early testers share their experience with Guidance.</p>
+
+    <!-- Average rating summary -->
+    <div id="reviewSummary" style="display:flex;align-items:center;gap:8px;margin-bottom:32px;font-family:'Syne',sans-serif"></div>
+
+    <!-- Loading state -->
+    <div id="reviewsLoading" style="text-align:center;padding:24px;color:#aaa;font-size:13px">
+      Loading reviews…
+    </div>
+
+    <!-- Submitted reviews display -->
+    <div id="reviewsList" style="display:flex;flex-direction:column;gap:16px;margin-bottom:48px">
+      <!-- Reviews load here -->
+      <div id="noReviews" style="text-align:center;padding:32px;background:#fff;border:1px solid var(--border);border-radius:14px;color:#aaa;font-size:14px">
+        No reviews yet — be the first to leave one below!
+      </div>
+    </div>
+
+    <!-- Submit a review form -->
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:32px">
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Leave a review</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:24px">Tried Guidance? Tell us what you think — good or bad. Your feedback shapes the product.</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Your name</label>
+          <input type="text" id="reviewName" placeholder="e.g. Lungelo M."
+            style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s"
+            onfocus="this.style.borderColor='#534AB7'" onblur="this.style.borderColor='rgba(14,13,26,0.1)'">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Rating</label>
+          <div id="starRating" style="display:flex;gap:6px;padding:8px 0">
+            <span class="star" data-val="1" onclick="setRating(1)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
+            <span class="star" data-val="2" onclick="setRating(2)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
+            <span class="star" data-val="3" onclick="setRating(3)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
+            <span class="star" data-val="4" onclick="setRating(4)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
+            <span class="star" data-val="5" onclick="setRating(5)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Your review</label>
+        <textarea id="reviewText" placeholder="What did you think of Guidance? Was the install easy? Did it help you find code changes faster?"
+          style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:100px;transition:border-color .15s"
+          onfocus="this.style.borderColor='#534AB7'" onblur="this.style.borderColor='rgba(14,13,26,0.1)'"></textarea>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Which tier are you on?</label>
+        <div style="display:flex;gap:10px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="reviewTier" value="Free" checked style="accent-color:#534AB7"> Free
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+            <input type="radio" name="reviewTier" value="Pro" style="accent-color:#534AB7"> Pro
+          </label>
+        </div>
+      </div>
+
+      <div id="reviewError" style="font-size:12px;color:#A32D2D;margin-bottom:10px;display:none"></div>
+      <div id="reviewSuccess" style="font-size:13px;color:#085041;background:#EAF3DE;padding:10px 14px;border-radius:8px;margin-bottom:10px;display:none">
+        ✓ Thank you for your review! It will appear shortly.
+      </div>
+
+      <button onclick="submitReview()"
+        style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:12px 28px;border-radius:9px;border:none;background:#534AB7;color:#fff;cursor:pointer;transition:background .2s"
+        onmouseover="this.style.background='#3C3489'" onmouseout="this.style.background='#534AB7'">
+        Submit Review →
+      </button>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">
@@ -1057,6 +1138,125 @@ footer{
 
 <script>
 const BACKEND = 'https://guidance-backend-396822769279.us-central1.run.app';
+
+// ── Reviews ──────────────────────────────────────────────────────────────
+let currentRating = 0;
+
+function setRating(val) {
+  currentRating = val;
+  document.querySelectorAll('.star').forEach((s, i) => {
+    s.style.opacity = i < val ? '1' : '0.3';
+    s.style.color = i < val ? '#EF9F27' : 'inherit';
+  });
+}
+
+async function submitReview() {
+  const name = document.getElementById('reviewName').value.trim();
+  const text = document.getElementById('reviewText').value.trim();
+  const tier = document.querySelector('input[name="reviewTier"]:checked').value;
+  const errEl = document.getElementById('reviewError');
+  const successEl = document.getElementById('reviewSuccess');
+  const btn = document.querySelector('#reviews button');
+
+  errEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  if (!name) { errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
+  if (!text || text.length < 10) { errEl.textContent = 'Please write a review of at least 10 characters.'; errEl.style.display = 'block'; return; }
+  if (currentRating === 0) { errEl.textContent = 'Please select a star rating.'; errEl.style.display = 'block'; return; }
+
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${BACKEND}/reviews/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, review_text: text, rating: currentRating, tier })
+    });
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    // Reset form
+    document.getElementById('reviewName').value = '';
+    document.getElementById('reviewText').value = '';
+    setRating(0);
+    successEl.textContent = '✓ Thank you! Your review has been submitted and will appear once approved.';
+    successEl.style.display = 'block';
+
+  } catch(e) {
+    errEl.textContent = e.message || 'Could not submit review. Please try again.';
+    errEl.style.display = 'block';
+  }
+
+  btn.textContent = 'Submit Review →';
+  btn.disabled = false;
+}
+
+async function loadReviews() {
+  try {
+    const res = await fetch(`${BACKEND}/reviews`);
+    const data = await res.json();
+    renderReviews(data.reviews || []);
+  } catch(e) {
+    console.log('Could not load reviews:', e);
+    renderReviews([]);
+  }
+}
+
+function renderReviews(reviews) {
+  const list = document.getElementById('reviewsList');
+  const noReviews = document.getElementById('noReviews');
+  const loading = document.getElementById('reviewsLoading');
+  if (loading) loading.style.display = 'none';
+
+  // Remove old cards
+  list.querySelectorAll('.review-card').forEach(e => e.remove());
+
+  if (reviews.length === 0) {
+    noReviews.style.display = 'block';
+    return;
+  }
+  noReviews.style.display = 'none';
+
+  // Average rating
+  const avg = (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1);
+  const summaryEl = document.getElementById('reviewSummary');
+  if (summaryEl) {
+    summaryEl.innerHTML = `<span style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif">${avg}</span>
+      <span style="color:#EF9F27;font-size:20px;margin:0 6px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span>
+      <span style="font-size:13px;color:#888">${reviews.length} review${reviews.length !== 1 ? 's' : ''}</span>`;
+  }
+
+  reviews.forEach(r => {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const date = new Date(r.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    card.style.cssText = 'background:#fff;border:1px solid rgba(14,13,26,0.08);border-radius:14px;padding:20px 24px;opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s';
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:50%;background:#EEEDFE;color:#534AB7;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            ${r.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700">${r.name}</div>
+            <div style="font-size:11px;color:#aaa">${date} · ${r.tier} tier</div>
+          </div>
+        </div>
+        <div style="color:#EF9F27;font-size:18px;letter-spacing:2px">${stars}</div>
+      </div>
+      <div style="font-size:14px;color:#444;line-height:1.6">${r.review_text}</div>
+    `;
+    list.appendChild(card);
+    setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'none'; }, 50);
+  });
+}
+
+// Load reviews on page load
+loadReviews();
 
 // ── Tab switcher ────────────────────────────────────────────────────────
 function switchTab(t) {
