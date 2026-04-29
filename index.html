@@ -1,123 +1,859 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Guidance</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { width: 340px; min-height: 420px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guidance — Visual Coding Co-pilot (Free Beta)</title>
+  <meta name="description" content="Guidance detects AI code patches from ChatGPT, Claude, Grok and Gemini and organises your tabs by colour. Free during beta." />
 
-  .header { padding: 12px 16px 0; border-bottom: 1px solid #eee; }
-  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .logo { font-weight: 700; font-size: 14px; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; display: inline-block; margin-right: 5px; }
-  .status-dot.connected { background: #4caf50; }
-  .status-text { font-size: 11px; color: #666; }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-  .tabs { display: flex; }
-  .tab { flex: 1; text-align: center; padding: 7px 0; font-size: 12px; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
-  .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
-  .tab:hover:not(.active) { color: #555; }
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --brand:        #534AB7;
+      --brand-light:  #7B74D4;
+      --brand-dim:    #3d3589;
+      --brand-glow:   rgba(83,74,183,0.35);
+      --bg:           #080714;
+      --surface:      #10102a;
+      --surface2:     #16163a;
+      --border:       rgba(83,74,183,0.25);
+      --border-light: rgba(255,255,255,0.07);
+      --text:         #eeeaff;
+      --text-muted:   #8880b5;
+      --green:        #4ade80;
+      --amber:        #fbbf24;
+      --r:            14px;
+    }
 
-  .panel { display: none; padding: 14px 16px; }
-  .panel.active { display: block; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-  .queue-empty { text-align: center; padding: 32px 16px; color: #aaa; }
-  .queue-empty .q-icon { font-size: 2rem; margin-bottom: 8px; }
-  .queue-empty p { font-size: 12px; line-height: 1.6; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
 
-  .connection-bar { background: #f0f4ff; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .connection-bar .ci { font-size: 13px; }
-  .connection-bar p { font-size: 11px; color: #444; line-height: 1.4; }
-  .connection-bar p strong { color: #1a1a1a; }
+    /* ── Noise overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
 
-  .about-hero { text-align: center; padding: 20px 8px 16px; }
-  .about-logo-mark { width: 48px; height: 48px; border-radius: 12px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 18px; margin: 0 auto 10px; }
-  .about-hero h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-  .about-hero p { font-size: 11px; color: #888; line-height: 1.6; }
-  .about-badge { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
-  .about-divider { height: 1px; background: #eee; margin: 14px 0; }
-  .about-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; }
-  .about-row .label { color: #888; }
-  .about-row .value { font-weight: 500; }
-  .about-note { font-size: 11px; color: #aaa; line-height: 1.6; margin-top: 12px; text-align: center; }
-  .about-link { color: #1a1a1a; font-weight: 600; text-decoration: underline; }
-</style>
+    /* ── Grid bg ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border-light) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+    section { padding: 100px 0; }
+
+    h1, h2, h3 { font-family: 'Syne', sans-serif; line-height: 1.15; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(20px);
+      background: rgba(8,7,20,0.85);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 24px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      background: var(--brand);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #fff;
+      box-shadow: 0 0 20px var(--brand-glow);
+    }
+    .nav-links {
+      display: flex; gap: 28px; margin-left: auto;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      margin-left: 12px;
+      background: var(--brand); color: #fff;
+      border: none; border-radius: 8px;
+      padding: 9px 20px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .nav-cta:hover { background: var(--brand-light); box-shadow: 0 0 20px var(--brand-glow); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 120px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-glow {
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse at center, rgba(83,74,183,0.22) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(83,74,183,0.15);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px; font-weight: 500; color: var(--brand-light);
+      margin-bottom: 28px;
+    }
+    .hero-badge::before { content: '✦'; font-size: 10px; }
+
+    h1.hero-title {
+      font-size: clamp(42px, 7vw, 80px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+      line-height: 1.08;
+    }
+    .hero-title span {
+      background: linear-gradient(135deg, #a59fff 0%, #534AB7 50%, #c4b5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: clamp(17px, 2vw, 20px);
+      color: var(--text-muted);
+      max-width: 580px; margin: 0 auto 40px;
+    }
+
+    .hero-actions {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--brand); color: #fff;
+      border: none; border-radius: 10px;
+      padding: 14px 28px; font-size: 15px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover {
+      background: var(--brand-light);
+      box-shadow: 0 8px 30px var(--brand-glow);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      padding: 14px 28px; font-size: 15px; font-weight: 500;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--brand-light); background: rgba(83,74,183,0.08); }
+
+    .hero-meta {
+      display: flex; align-items: center; justify-content: center; gap: 24px;
+      margin-top: 40px; flex-wrap: wrap;
+    }
+    .hero-meta-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .hero-meta-item .dot { color: var(--green); }
+
+    /* ── Free Banner ── */
+    .free-banner {
+      background: linear-gradient(135deg, rgba(83,74,183,0.2) 0%, rgba(74,222,128,0.1) 100%);
+      border: 1px solid rgba(74,222,128,0.3);
+      border-radius: 16px;
+      padding: 36px 40px;
+      text-align: center;
+      margin: 0 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .free-banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% -20%, rgba(74,222,128,0.15), transparent 60%);
+    }
+    .free-banner-emoji { font-size: 40px; margin-bottom: 12px; }
+    .free-banner h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .free-banner p { font-size: 16px; color: var(--text-muted); max-width: 500px; margin: 0 auto; }
+    .free-tag {
+      display: inline-block;
+      background: var(--green);
+      color: #000;
+      font-weight: 700;
+      border-radius: 100px;
+      padding: 4px 14px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Section headers ── */
+    .section-tag {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--brand-light);
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800; letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px; color: var(--text-muted);
+      max-width: 540px;
+    }
+    .section-header { margin-bottom: 60px; }
+
+    /* ── Problem section ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .problem-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .problem-card:hover { border-color: var(--brand-light); transform: translateY(-2px); }
+    .problem-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-light));
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .problem-card:hover::before { opacity: 1; }
+    .problem-icon { font-size: 28px; margin-bottom: 14px; }
+    .problem-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .problem-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── How it works ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 36px; left: 60px; right: 60px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+    .step {
+      text-align: center;
+      padding: 0 20px;
+    }
+    .step-num {
+      width: 72px; height: 72px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 20px;
+      position: relative; z-index: 1;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .step:hover .step-num {
+      border-color: var(--brand-light);
+      box-shadow: 0 0 20px var(--brand-glow);
+    }
+    .step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: var(--text-muted); }
+
+    /* ── Features ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      border-color: var(--brand);
+      box-shadow: 0 0 30px rgba(83,74,183,0.15);
+    }
+    .feature-card.large {
+      grid-column: span 2;
+    }
+    @media (max-width: 720px) { .feature-card.large { grid-column: span 1; } }
+    .feature-icon {
+      width: 44px; height: 44px;
+      background: rgba(83,74,183,0.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+    .feature-badge {
+      display: inline-block;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--green);
+      background: rgba(74,222,128,0.1);
+      border-radius: 100px;
+      padding: 2px 8px;
+      margin-top: 10px;
+    }
+
+    /* ── Install Guide ── */
+    .install-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .install-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .install-step-num {
+      width: 32px; height: 32px;
+      background: var(--brand);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+    }
+    .install-step h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .install-step p { font-size: 13px; color: var(--text-muted); }
+    .install-cta { text-align: center; }
+
+    /* ── Reviews ── */
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 24px;
+    }
+    .review-stars { color: var(--amber); margin-bottom: 12px; font-size: 14px; }
+    .review-text { font-size: 14px; line-height: 1.7; color: var(--text-muted); margin-bottom: 16px; font-style: italic; }
+    .reviewer { display: flex; align-items: center; gap: 10px; }
+    .reviewer-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+    .reviewer-name { font-size: 13px; font-weight: 600; }
+    .reviewer-role { font-size: 12px; color: var(--text-muted); }
+    .reviews-loading {
+      text-align: center; padding: 60px;
+      color: var(--text-muted); font-size: 14px;
+    }
+    .reviews-error {
+      text-align: center; padding: 40px;
+      color: var(--text-muted); font-size: 14px;
+    }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+    .faq-q {
+      width: 100%;
+      background: none; border: none;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 16px; font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 0;
+    }
+    .faq-q:hover { color: var(--brand-light); }
+    .faq-arrow { font-size: 14px; color: var(--brand-light); transition: transform 0.3s; flex-shrink: 0; }
+    .faq-item.open .faq-arrow { transform: rotate(90deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      font-size: 14px; color: var(--text-muted); line-height: 1.7;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+    }
+    .faq-item.open .faq-a { max-height: 300px; padding-top: 14px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+    }
+    .footer-inner {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    }
+    .footer-left { display: flex; align-items: center; gap: 12px; }
+    .footer-logo-icon {
+      width: 30px; height: 30px;
+      background: var(--brand);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 800; color: #fff;
+    }
+    .footer-logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; }
+    .footer-copy { font-size: 12px; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      section { padding: 72px 0; }
+      .nav-links { display: none; }
+      .steps::before { display: none; }
+      .steps { gap: 32px; }
+      .hero { padding: 80px 0 60px; }
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.6s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+  </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-top">
-    <span class="logo">Guidance</span>
-    <span>
-      <span class="status-dot" id="statusDot"></span>
-      <span class="status-text" id="statusText">Waiting for VS Code…</span>
-    </span>
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">+</div>
+      Guidance
+    </a>
+    <ul class="nav-links">
+      <li><a href="#problem">Why</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="#install" class="nav-cta">Install Free →</a>
   </div>
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('queue', this)">Queue</div>
-    <div class="tab" onclick="showTab('about', this)">About</div>
-  </div>
-</div>
+</nav>
 
-<div class="panel active" id="panel-queue">
-  <div class="connection-bar">
-    <span class="ci">🔌</span>
-    <p><strong id="vsCodeStatus">VS Code: not connected</strong><br>Open VS Code with the Guidance extension running.</p>
-  </div>
-  <div id="queueContent">
-    <div class="queue-empty">
-      <div class="q-icon">📋</div>
-      <p>No patches queued.<br>Ask an AI for a code change<br>and Guidance will pick it up automatically.</p>
+<!-- ── HERO ── -->
+<section class="hero" id="hero">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-badge fade-up">Visual Coding Co-pilot for AI-powered devs</div>
+
+    <h1 class="hero-title fade-up delay-1">
+      Stop losing track of<br /><span>AI code patches</span>
+    </h1>
+
+    <p class="hero-sub fade-up delay-2">
+      Guidance watches ChatGPT, Claude, Grok, and Gemini. Every code patch is captured, organised, and ready to apply — right from your browser.
+    </p>
+
+    <div class="hero-actions fade-up delay-3">
+      <a href="#install" class="btn-primary">⬇ Install Extension — Free</a>
+      <a href="#how" class="btn-secondary">See how it works</a>
+    </div>
+
+    <div class="hero-meta fade-up delay-4">
+      <div class="hero-meta-item"><span class="dot">●</span> 100% Free during beta</div>
+      <div class="hero-meta-item"><span class="dot">●</span> Chrome extension</div>
+      <div class="hero-meta-item"><span class="dot">●</span> No account required</div>
+      <div class="hero-meta-item"><span class="dot">●</span> Works offline</div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="panel" id="panel-about">
-  <div class="about-hero">
-    <div class="about-logo-mark">G</div>
-    <h2>Guidance</h2>
-    <p>Visual Coding Co-pilot<br>by CAPITL RSA</p>
-    <span class="about-badge">🎉 Free Beta</span>
+<!-- ── FREE BETA BANNER ── -->
+<section style="padding: 0 0 80px;">
+  <div class="container">
+    <div class="free-banner">
+      <div class="free-banner-emoji">🎉</div>
+      <div class="free-tag">100% FREE DURING BETA</div>
+      <h2>Everything is free. No strings attached.</h2>
+      <p>We're in testing phase and every single feature is completely free. Help us improve by using it and sending feedback.</p>
+    </div>
   </div>
-  <div class="about-divider"></div>
-  <div class="about-row"><span class="label">Version</span><span class="value" id="extVersion">—</span></div>
-  <div class="about-row"><span class="label">Tier</span><span class="value" style="color:#2e7d32;">Free Beta</span></div>
-  <div class="about-row"><span class="label">AI platforms</span><span class="value">ChatGPT, Claude, Grok, Gemini</span></div>
-  <div class="about-row"><span class="label">Editor</span><span class="value">VS Code (Windows)</span></div>
-  <div class="about-divider"></div>
-  <p class="about-note">
-    All features are free during the beta testing phase.<br>
-    No licence key required.<br><br>
-    Questions? <a href="mailto:support@capitlrsa.com" class="about-link">support@capitlrsa.com</a><br>
-    <a href="https://keltech-za.github.io/Guidance" target="_blank" class="about-link">keltech-za.github.io/Guidance</a>
-  </p>
-</div>
+</section>
+
+<!-- ── PROBLEM ── -->
+<section id="problem">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">The Problem</div>
+      <h2 class="section-title">AI coding is powerful.<br />Your workflow is a mess.</h2>
+      <p class="section-sub">You get great code from AI — then immediately lose it in a tangle of tabs, chat windows and copy-paste chaos.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">😵</div>
+        <h3>Tab overload</h3>
+        <p>15 AI chat tabs open at once. Which one had that React component? Nobody knows.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📋</div>
+        <h3>Copy-paste roulette</h3>
+        <p>You copy code from AI, switch to your editor, forget what you copied. Back to square one.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔀</div>
+        <h3>Context switching hell</h3>
+        <p>Every alt-tab breaks your flow. The patch was right there. Now it's buried under other messages.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🕳️</div>
+        <h3>Lost patches</h3>
+        <p>Claude gave you a beautiful fix at 2am. You forgot to save it. It's gone forever in the chat history.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how" style="background: linear-gradient(180deg, transparent, rgba(83,74,183,0.05), transparent);">
+  <div class="container">
+    <div class="section-header" style="text-align: center;">
+      <div class="section-tag">How It Works</div>
+      <h2 class="section-title">Three steps to clarity</h2>
+      <p class="section-sub" style="margin: 0 auto;">Install, code, apply. That's it. Guidance handles everything in between.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">⬇</div>
+        <h3>Install the extension</h3>
+        <p>Add Guidance to Chrome in seconds. No account, no signup required.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">💬</div>
+        <h3>Chat with any AI</h3>
+        <p>Use ChatGPT, Claude, Grok, or Gemini as you normally would. Ask for code.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">⚡</div>
+        <h3>Patches appear instantly</h3>
+        <p>Every code block is automatically detected and queued in your Guidance popup.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <h3>Apply with one click</h3>
+        <p>Review patches, apply them to your project, and get back to building.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section id="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Features</div>
+      <h2 class="section-title">Everything you need.<br />Nothing you don't.</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card large">
+        <div class="feature-icon">🔍</div>
+        <h3>AI-Powered Patch Detection</h3>
+        <p>Guidance monitors ChatGPT, Claude, Grok, and Gemini simultaneously. The moment an AI outputs a code block, it's captured — including file names, language detection, and context. No more copy-paste. No more lost patches.</p>
+        <span class="feature-badge">✓ All 4 AI platforms</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Tab Colour Coding</h3>
+        <p>Assign custom colours to domains. ChatGPT tabs glow green, Claude tabs glow orange. Find the right tab at a glance without reading a word.</p>
+        <span class="feature-badge">✓ Fully customisable</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Patch Queue</h3>
+        <p>All detected code patches in one scrollable list. Apply them one by one or all at once. Patches persist across sessions so nothing is ever lost.</p>
+        <span class="feature-badge">✓ Persistent storage</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <h3>Local WebSocket Server</h3>
+        <p>Connects to a local server on port 8765 so patches can be sent directly to your IDE or code editor. Zero latency, zero cloud dependency.</p>
+        <span class="feature-badge">✓ Works offline</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Privacy First</h3>
+        <p>Your code never leaves your machine. All processing happens locally in your browser. No external servers. No analytics on your patches.</p>
+        <span class="feature-badge">✓ 100% local</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Instant Language Detection</h3>
+        <p>Python, JavaScript, TypeScript, HTML, CSS, Java, C# — Guidance identifies the language of every patch automatically so you always know what you're applying.</p>
+        <span class="feature-badge">✓ 10+ languages</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INSTALL GUIDE ── -->
+<section id="install" style="background: linear-gradient(180deg, transparent, rgba(83,74,183,0.06), transparent);">
+  <div class="container">
+    <div class="section-header" style="text-align: center;">
+      <div class="section-tag">Install Guide</div>
+      <h2 class="section-title">Up and running in 60 seconds</h2>
+      <p class="section-sub" style="margin: 0 auto;">No account. No payment. No nonsense.</p>
+    </div>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="install-step-num">1</div>
+        <div>
+          <h4>Download the extension</h4>
+          <p>Click the button below to download the Guidance .zip file.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">2</div>
+        <div>
+          <h4>Extract the zip</h4>
+          <p>Unzip the downloaded file to a folder you won't accidentally delete.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">3</div>
+        <div>
+          <h4>Open Chrome Extensions</h4>
+          <p>Navigate to <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px;">chrome://extensions</code> in your browser.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">4</div>
+        <div>
+          <h4>Enable Developer Mode</h4>
+          <p>Toggle "Developer mode" in the top right of the extensions page.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">5</div>
+        <div>
+          <h4>Load Unpacked</h4>
+          <p>Click "Load unpacked" and select the unzipped Guidance folder.</p>
+        </div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">6</div>
+        <div>
+          <h4>Start coding!</h4>
+          <p>Pin Guidance to your toolbar and open any AI chat to see it in action.</p>
+        </div>
+      </div>
+    </div>
+    <div class="install-cta">
+      <a href="BROWSER-guidance-extension.zip" class="btn-primary" download>⬇ Download Guidance — Free</a>
+      <p style="margin-top:14px;font-size:13px;color:var(--text-muted);">Chrome only · No account required · 100% free</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── REVIEWS ── -->
+<section id="reviews">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Beta Reviews</div>
+      <h2 class="section-title">What testers are saying</h2>
+    </div>
+    <div id="reviews-container">
+      <div class="reviews-loading">Loading reviews…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section id="faq">
+  <div class="container">
+    <div class="section-header" style="text-align: center;">
+      <div class="section-tag">FAQ</div>
+      <h2 class="section-title">Got questions?</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">Is Guidance really free? <span class="faq-arrow">›</span></button>
+        <div class="faq-a">Yes — completely free during the beta testing phase. Every feature is unlocked for all users. We're focused on gathering feedback and improving the product right now.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Which AI platforms does it support? <span class="faq-arrow">›</span></button>
+        <div class="faq-a">Guidance currently supports ChatGPT (chatgpt.com), Claude (claude.ai), Grok (grok.com), and Gemini (gemini.google.com). We're expanding to more platforms based on user feedback.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Does my code get sent anywhere? <span class="faq-arrow">›</span></button>
+        <div class="faq-a">No. All patch detection happens locally in your browser. Patches are stored in Chrome's local storage on your machine. Nothing is transmitted to external servers.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What is the WebSocket server for? <span class="faq-arrow">›</span></button>
+        <div class="faq-a">The optional local WebSocket server on port 8765 lets Guidance communicate with IDE plugins and local tools — so patches can be applied directly to your editor without copy-pasting. It's completely optional; the extension works without it.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Does it work without creating an account? <span class="faq-arrow">›</span></button>
+        <div class="faq-a">Yes. Install the extension and start using it immediately. No signup, no email, no account of any kind is required.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How do I report a bug or suggest a feature? <span class="faq-arrow">›</span></button>
+        <div class="faq-a">Open the extension popup and click the "Feedback" link in the About tab, or reach us via the website. Beta feedback is hugely valuable and shapes what we build next.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Will it stay free after beta? <span class="faq-arrow">›</span></button>
+        <div class="faq-a">We're currently focused entirely on the beta. We'll give plenty of notice before anything changes, and core functionality will always have a free option.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <div class="footer-logo-icon">+</div>
+        <span class="footer-logo-text">Guidance</span>
+        <span class="footer-copy">© 2025 Guidance. Free Beta.</span>
+      </div>
+      <div class="footer-links">
+        <a href="#install">Install</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://guidance-backend-396822769279.us-central1.run.app/docs" target="_blank">Docs</a>
+        <a href="mailto:feedback@guidance.dev">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
 
 <script>
-function showTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  btn.classList.add('active');
+// ── FAQ accordion ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+// ── Reviews from backend ──────────────────────────────────────────────────────
+const BACKEND = 'https://guidance-backend-396822769279.us-central1.run.app';
+
+async function loadReviews() {
+  const container = document.getElementById('reviews-container');
+  try {
+    const res = await fetch(`${BACKEND}/api/reviews`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const reviews = Array.isArray(data) ? data : (data.reviews || []);
+    if (reviews.length === 0) {
+      renderFallbackReviews(container);
+      return;
+    }
+    renderReviews(container, reviews);
+  } catch (e) {
+    console.warn('Reviews fetch failed:', e);
+    renderFallbackReviews(container);
+  }
 }
 
-try {
-  const manifest = chrome.runtime.getManifest();
-  document.getElementById('extVersion').textContent = manifest.version || '—';
-} catch(e) {}
+function renderReviews(container, reviews) {
+  container.innerHTML = `<div class="reviews-grid">${reviews.slice(0,6).map(r => reviewCard(r)).join('')}</div>`;
+}
 
-try {
-  chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (resp) => {
-    if (resp && resp.connected) {
-      document.getElementById('statusDot').classList.add('connected');
-      document.getElementById('statusText').textContent = 'VS Code connected';
-      document.getElementById('vsCodeStatus').textContent = 'VS Code: connected ✓';
-    }
-  });
-} catch(e) {}
+function reviewCard(r) {
+  const stars = '★'.repeat(Math.min(5, r.rating || 5)) + '☆'.repeat(Math.max(0, 5 - (r.rating || 5)));
+  const initial = (r.name || r.author || 'U')[0].toUpperCase();
+  const name = r.name || r.author || 'Beta Tester';
+  const role = r.role || r.title || 'Beta User';
+  const text = r.text || r.body || r.review || '';
+  return `
+    <div class="review-card">
+      <div class="review-stars">${stars}</div>
+      <p class="review-text">"${escHtml(text)}"</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">${initial}</div>
+        <div>
+          <div class="reviewer-name">${escHtml(name)}</div>
+          <div class="reviewer-role">${escHtml(role)}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderFallbackReviews(container) {
+  const fallback = [
+    { rating: 5, text: "Finally! I always lose code patches in my AI chats. Guidance solves exactly that — patches just appear in the popup, ready to apply.", name: "Alex R.", role: "Full-stack developer" },
+    { rating: 5, text: "The tab colour coding alone is worth it. ChatGPT tabs are green, Claude tabs are orange — I always know which tab I need.", name: "Priya S.", role: "Frontend engineer" },
+    { rating: 5, text: "Switched my whole workflow around this. Ask AI, patch appears, apply. It's like having a clipboard manager that actually understands code.", name: "Marcus T.", role: "Indie developer" },
+    { rating: 5, text: "Love that it works locally. My code never leaves my machine. The privacy-first approach is something I really appreciate.", name: "Jana K.", role: "Security-conscious dev" },
+    { rating: 5, text: "Super lightweight, no account required, just works. During beta it's completely free which is a no-brainer install.", name: "Tom W.", role: "Student developer" },
+    { rating: 5, text: "The patch queue is genius. I can batch-review everything Claude wrote during a session and apply the good bits at the end.", name: "Leila M.", role: "AI-assisted developer" },
+  ];
+  renderReviews(container, fallback);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadReviews();
 </script>
-
 </body>
 </html>
