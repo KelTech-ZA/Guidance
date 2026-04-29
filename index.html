@@ -75,6 +75,8 @@
   .step-list li > div p { font-size: 0.88rem; color: #555; }
   code { background: #f0f0f0; border-radius: 4px; padding: 1px 5px; font-size: 0.85em; font-family: 'Courier New', monospace; }
   .dl-btn { display: inline-block; background: #1a1a1a; color: #fff; padding: 0.65rem 1.4rem; border-radius: 6px; font-size: 0.88rem; font-weight: 600; margin-top: 0.6rem; }
+  .ps-box { background: #f0f0f0; border-radius: 6px; padding: 0.75rem 1rem; margin-top: 0.75rem; font-family: 'Courier New', monospace; font-size: 0.78rem; word-break: break-all; color: #1a1a1a; }
+  .ps-warning { font-size: 0.85rem; color: #555; margin-top: 0.75rem; }
 
   details { border: 1px solid #eee; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
   details summary { font-weight: 600; font-size: 0.95rem; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
@@ -230,8 +232,14 @@
       <ol class="step-list">
         <li><div><h3>Install VS Code (required)</h3><p>Download VS Code free from <code>code.visualstudio.com</code>. Requires approximately 350MB of free space.</p></div></li>
         <li><div><h3>Install Node.js (required)</h3><p>Download the LTS version from <code>nodejs.org</code>. Choose the Windows installer. Skip if already installed.</p></div></li>
-        <li><div><h3>Download the VS Code extension</h3><p>Download the Guidance VS Code extension zip file below. File size is approximately 10KB.</p><a href="https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" class="dl-btn">Download VS Code Extension</a></div></li>
-        <li><div><h3>Install the VS Code extension</h3><p>Unzip the downloaded file. Open VS Code → press <code>Ctrl+`</code> to open the Terminal → run these two commands one at a time:</p><p style="margin-top:0.5rem"><code>xcopy /e /i /y "C:\Users\YourName\Downloads\VSCODE-guidance-extension-NEW" "C:\Users\YourName\.vscode\extensions\guidance-vscode"</code></p><p style="margin-top:0.5rem">Then: <code>cd "%USERPROFILE%\.vscode\extensions\guidance-vscode" &amp;&amp; npm install ws</code></p><p style="margin-top:0.5rem">Close and reopen VS Code. You'll see <strong>Guidance: ready</strong> in the bottom status bar.</p></div></li>
+        <li><div>
+          <h3>Download the VS Code extension</h3>
+          <p>Download the Guidance VS Code extension zip file below. File size is approximately 10KB.</p>
+          <a href="https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" class="dl-btn">Download VS Code Extension</a>
+          <p class="ps-warning">⚠️ If your browser blocks the download, open <strong>PowerShell as Administrator</strong> and run this command instead:</p>
+          <div class="ps-box">Invoke-WebRequest -Uri "https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" -OutFile "$env:USERPROFILE\Downloads\VSCODE-guidance-extension.zip"</div>
+        </div></li>
+        <li><div><h3>Install the VS Code extension</h3><p>Unzip the downloaded file. Open VS Code → press <code>Ctrl+`</code> to open the Terminal → run these two commands one at a time:</p><p style="margin-top:0.5rem"><code>xcopy /e /i /y "C:\Users\YourName\Downloads\VSCODE-guidance-extension" "C:\Users\YourName\.vscode\extensions\guidance-vscode"</code></p><p style="margin-top:0.5rem">Then: <code>cd "%USERPROFILE%\.vscode\extensions\guidance-vscode" &amp;&amp; npm install ws</code></p><p style="margin-top:0.5rem">Close and reopen VS Code. You'll see <strong>Guidance: ready</strong> in the bottom status bar.</p></div></li>
         <li><div><h3>Open your project in VS Code</h3><p>In VS Code: <code>File → Open Folder</code> → select your project folder. The status bar will show <strong>Guidance: browser connected</strong> once the browser extension is also running.</p></div></li>
         <li><div><h3>Assign project colours (optional)</h3><p>Press <code>Ctrl+Shift+P</code> → type <code>Guidance: Assign Colour</code> → select your project → pick a colour.</p></div></li>
       </ol>
@@ -247,6 +255,7 @@
   <details><summary>Do I need to understand coding to use Guidance?</summary><p>No. Guidance is built for people who use AI to write code but struggle with where to apply the changes. You don't need to understand the code — Guidance shows you exactly where to paste it.</p></details>
   <details><summary>Which AI platforms does it work with?</summary><p>ChatGPT (chatgpt.com), Claude (claude.ai), Grok (grok.com) and Gemini (gemini.google.com). It works with all of them simultaneously.</p></details>
   <details><summary>Is my code sent anywhere?</summary><p>No. Everything runs on your local machine over a local WebSocket connection — your code never leaves your computer.</p></details>
+  <details><summary>My browser is blocking the VS Code extension download. What do I do?</summary><p>This is a known false positive from Windows Defender. Open <strong>PowerShell as Administrator</strong> and run this command to download it directly:</p><div class="ps-box" style="margin-top:0.5rem;">Invoke-WebRequest -Uri "https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" -OutFile "$env:USERPROFILE\Downloads\VSCODE-guidance-extension.zip"</div></details>
 </section>
 
 <section id="reviews" style="background:#fafafa;max-width:100%;padding:5rem 2rem;">
@@ -257,14 +266,10 @@
     <div id="reviewsLoading" style="color:#aaa;font-size:0.9rem;">Loading reviews…</div>
     <div id="reviewsList"></div>
     <div id="noReviews" style="display:none;color:#aaa;font-size:0.9rem;">No reviews yet — be the first to leave one below!</div>
-
     <div class="review-form">
       <h3>Leave a review</h3>
       <p style="font-size:0.88rem;color:#666;margin-bottom:1.25rem;">Tried Guidance? Tell us what you think — good or bad. Your feedback shapes the product.</p>
-      <div class="form-row">
-        <label>Your name</label>
-        <input type="text" id="reviewName" placeholder="Jane Smith" />
-      </div>
+      <div class="form-row"><label>Your name</label><input type="text" id="reviewName" placeholder="Jane Smith" /></div>
       <div class="form-row">
         <label>Rating</label>
         <div style="display:flex;gap:6px;">
@@ -275,10 +280,7 @@
           <span class="star" onclick="setRating(5)">★</span>
         </div>
       </div>
-      <div class="form-row">
-        <label>Your review</label>
-        <textarea id="reviewText" placeholder="What did you think?"></textarea>
-      </div>
+      <div class="form-row"><label>Your review</label><textarea id="reviewText" placeholder="What did you think?"></textarea></div>
       <button class="btn-submit" onclick="submitReview()">Submit Review →</button>
       <p class="review-success" id="reviewSuccess"></p>
       <p class="review-error" id="reviewError"></p>
@@ -302,7 +304,6 @@
 <script>
 const BACKEND = 'https://guidance-backend-396822769279.us-central1.run.app';
 
-// ── Reviews ──────────────────────────────────────────────────────────────
 let currentRating = 0;
 
 function setRating(val) {
