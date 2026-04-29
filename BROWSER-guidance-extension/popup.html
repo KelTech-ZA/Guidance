@@ -32,6 +32,13 @@
   .connection-bar p { font-size: 11px; color: #444; line-height: 1.4; }
   .connection-bar p strong { color: #1a1a1a; }
 
+  .patch-card { background: #f8f8f8; border: 1px solid #e8e8e8; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .patch-file { font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+  .patch-meta { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .patch-actions { display: flex; gap: 6px; margin-top: 8px; }
+  .btn-sm { font-size: 11px; padding: 4px 10px; border-radius: 5px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-family: inherit; }
+  .btn-sm.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
   .about-hero { text-align: center; padding: 20px 8px 16px; }
   .about-logo-mark { width: 48px; height: 48px; border-radius: 12px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 18px; margin: 0 auto 10px; }
   .about-hero h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
@@ -108,15 +115,56 @@ try {
   document.getElementById('extVersion').textContent = manifest.version || '—';
 } catch(e) {}
 
-try {
-  chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (resp) => {
-    if (resp && resp.connected) {
-      document.getElementById('statusDot').classList.add('connected');
-      document.getElementById('statusText').textContent = 'VS Code connected';
-      document.getElementById('vsCodeStatus').textContent = 'VS Code: connected ✓';
-    }
+function checkStatus() {
+  try {
+    chrome.runtime.sendMessage({ type: 'GET_WS_STATUS' }, (resp) => {
+      if (chrome.runtime.lastError) return;
+      if (resp && resp.connected) {
+        document.getElementById('statusDot').classList.add('connected');
+        document.getElementById('statusText').textContent = 'VS Code connected';
+        document.getElementById('vsCodeStatus').textContent = 'VS Code: connected ✓';
+        document.getElementById('vsCodeStatus').style.color = '#2e7d32';
+      } else {
+        document.getElementById('statusDot').classList.remove('connected');
+        document.getElementById('statusText').textContent = 'Waiting for VS Code…';
+        document.getElementById('vsCodeStatus').textContent = 'VS Code: not connected';
+        document.getElementById('vsCodeStatus').style.color = '#1a1a1a';
+      }
+    });
+  } catch(e) {}
+}
+
+checkStatus();
+setInterval(checkStatus, 2000);
+
+chrome.storage.local.get('settings', (data) => {
+  const patches = (data.settings?.pendingPatches || []).filter(p => p.status === 'pending');
+  if (patches.length === 0) return;
+  const container = document.getElementById('queueContent');
+  container.innerHTML = '';
+  patches.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'patch-card';
+    card.innerHTML = `
+      <div class="patch-file">${p.filename || 'Unknown file'}</div>
+      <div class="patch-meta">${p.source || ''} · ${new Date(p.detectedAt).toLocaleTimeString()}</div>
+      <div class="patch-actions">
+        <button class="btn-sm primary" onclick="openFile(${p.id})">Open file ↗</button>
+        <button class="btn-sm" onclick="markDone(${p.id})">✓ Mark done</button>
+      </div>`;
+    container.appendChild(card);
   });
-} catch(e) {}
+});
+
+function openFile(id) {
+  chrome.runtime.sendMessage({ type: 'OPEN_FILE', id });
+}
+
+function markDone(id) {
+  chrome.runtime.sendMessage({ type: 'PATCH_DONE', id }, () => {
+    location.reload();
+  });
+}
 </script>
 
 </body>
