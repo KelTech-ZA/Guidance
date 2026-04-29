@@ -3,413 +3,120 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Guidance — Visual Coding Co-pilot</title>
+<title>Guidance</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; line-height: 1.6; color: #1a1a1a; background: #fff; }
-  a { color: inherit; text-decoration: none; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 340px; min-height: 420px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; }
 
-  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid #eee; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; }
-  .nav-logo { font-weight: 700; font-size: 1.1rem; }
-  .nav-links { display: flex; gap: 1.5rem; align-items: center; list-style: none; font-size: 0.9rem; }
-  .nav-links a { color: #555; transition: color 0.2s; }
-  .nav-links a:hover { color: #000; }
+  .header { padding: 12px 16px 0; border-bottom: 1px solid #eee; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .logo { font-weight: 700; font-size: 14px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; display: inline-block; margin-right: 5px; }
+  .status-dot.connected { background: #4caf50; }
+  .status-text { font-size: 11px; color: #666; }
 
-  section { padding: 5rem 2rem; max-width: 960px; margin: 0 auto; }
-  h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
-  .section-sub { color: #666; margin-bottom: 3rem; font-size: 1.05rem; }
+  .tabs { display: flex; }
+  .tab { flex: 1; text-align: center; padding: 7px 0; font-size: 12px; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+  .tab:hover:not(.active) { color: #555; }
 
-  .compat-banner { background: #fff8e1; border-bottom: 1px solid #ffe082; text-align: center; padding: 0.6rem 1rem; font-size: 0.85rem; color: #5d4037; }
-  .compat-banner strong { color: #4e342e; }
+  .panel { display: none; padding: 14px 16px; }
+  .panel.active { display: block; }
 
-  .hero { text-align: center; padding: 6rem 2rem 4rem; max-width: 760px; margin: 0 auto; }
-  .hero-eyebrow { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; color: #888; text-transform: uppercase; margin-bottom: 1rem; }
-  .hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.25rem; }
-  .hero h1 em { font-style: italic; }
-  .hero p { font-size: 1.15rem; color: #444; max-width: 560px; margin: 0 auto 2.5rem; }
-  .btn-primary { display: inline-block; background: #1a1a1a; color: #fff; padding: 0.85rem 2.2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; transition: background 0.2s, transform 0.15s; }
-  .btn-primary:hover { background: #333; transform: translateY(-1px); }
+  .queue-empty { text-align: center; padding: 32px 16px; color: #aaa; }
+  .queue-empty .q-icon { font-size: 2rem; margin-bottom: 8px; }
+  .queue-empty p { font-size: 12px; line-height: 1.6; }
 
-  .demo-block { background: #f8f8f8; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1.5rem; max-width: 640px; margin: 3rem auto 0; font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.7; text-align: left; }
-  .demo-label { font-family: -apple-system, sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #999; margin-bottom: 0.5rem; }
-  .demo-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-  .demo-col { flex: 1; min-width: 180px; }
-  .demo-divider { height: 1px; background: #e4e4e4; margin: 1rem 0; }
-  .del { color: #c0392b; } .ins { color: #27ae60; }
-  .dbadge { display: inline-block; font-family: -apple-system, sans-serif; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; margin-bottom: 0.5rem; }
+  .connection-bar { background: #f0f4ff; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .connection-bar .ci { font-size: 13px; }
+  .connection-bar p { font-size: 11px; color: #444; line-height: 1.4; }
+  .connection-bar p strong { color: #1a1a1a; }
 
-  .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-  .problem-card { background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 1.5rem; }
-  .problem-card .icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
-  .problem-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
-  .problem-card p { font-size: 0.9rem; color: #666; }
-
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 2rem; }
-  .step { text-align: center; }
-  .step-num { font-size: 0.75rem; font-weight: 700; color: #aaa; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
-  .step-icon { font-size: 2rem; margin-bottom: 0.75rem; }
-  .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
-  .step p { font-size: 0.88rem; color: #666; }
-
-  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-  .feature { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 1.5rem; }
-  .feature .ficon { font-size: 1.5rem; margin-bottom: 0.75rem; }
-  .feature h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
-  .feature p { font-size: 0.88rem; color: #666; }
-
-  .install-tabs { display: flex; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; width: fit-content; margin-bottom: 2rem; }
-  .install-tab { padding: 0.6rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; background: #fff; border: none; color: #666; transition: background 0.15s; }
-  .install-tab.active { background: #1a1a1a; color: #fff; }
-  .install-panel { display: none; }
-  .install-panel.active { display: block; }
-  .req-box { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
-  .req-box h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; }
-  .req-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
-  .req-item dt { font-size: 0.75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
-  .req-item dd { font-size: 0.88rem; color: #333; }
-  .step-list { list-style: none; counter-reset: steps; }
-  .step-list li { counter-increment: steps; display: flex; gap: 1.25rem; margin-bottom: 1.75rem; align-items: flex-start; }
-  .step-list li::before { content: counter(steps); display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: #1a1a1a; color: #fff; font-size: 0.78rem; font-weight: 700; }
-  .step-list li > div h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
-  .step-list li > div p { font-size: 0.88rem; color: #555; }
-  code { background: #f0f0f0; border-radius: 4px; padding: 1px 5px; font-size: 0.85em; font-family: 'Courier New', monospace; }
-  .dl-btn { display: inline-block; background: #1a1a1a; color: #fff; padding: 0.65rem 1.4rem; border-radius: 6px; font-size: 0.88rem; font-weight: 600; margin-top: 0.6rem; }
-  .ps-box { background: #f0f0f0; border-radius: 6px; padding: 0.75rem 1rem; margin-top: 0.75rem; font-family: 'Courier New', monospace; font-size: 0.78rem; word-break: break-all; color: #1a1a1a; }
-  .ps-warning { font-size: 0.85rem; color: #555; margin-top: 0.75rem; }
-
-  details { border: 1px solid #eee; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
-  details summary { font-weight: 600; font-size: 0.95rem; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-  details summary::after { content: '▼'; font-size: 0.7rem; color: #aaa; transition: transform 0.2s; }
-  details[open] summary::after { transform: rotate(180deg); }
-  details p { margin-top: 0.75rem; font-size: 0.9rem; color: #555; line-height: 1.7; }
-
-  .review-card { background: #fff; border: 1px solid rgba(14,13,26,0.08); border-radius: 14px; padding: 20px 24px; margin-bottom: 16px; }
-  .review-form { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 2rem; margin-top: 2rem; }
-  .review-form h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; }
-  .form-row { margin-bottom: 1rem; }
-  .form-row label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; color: #444; }
-  .form-row input, .form-row textarea { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.9rem; font-family: inherit; }
-  .form-row textarea { min-height: 100px; resize: vertical; }
-  .star { font-size: 1.5rem; cursor: pointer; opacity: 0.3; transition: opacity 0.15s; }
-  .btn-submit { background: #1a1a1a; color: #fff; border: none; padding: 0.7rem 1.6rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
-  .review-success { display: none; color: #2e7d32; font-weight: 600; margin-top: 0.75rem; font-size: 0.9rem; }
-  .review-error { display: none; color: #c0392b; font-weight: 600; margin-top: 0.75rem; font-size: 0.9rem; }
-
-  footer { border-top: 1px solid #eee; padding: 2rem; text-align: center; font-size: 0.82rem; color: #888; }
-  footer a { color: #888; }
-  footer a:hover { color: #333; }
-  .footer-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
-
-  @media (max-width: 600px) {
-    nav { padding: 0 1rem; }
-    .nav-links { gap: 0.9rem; font-size: 0.8rem; }
-    section { padding: 3.5rem 1rem; }
-    .hero { padding: 4rem 1rem 2.5rem; }
-  }
+  .about-hero { text-align: center; padding: 20px 8px 16px; }
+  .about-logo-mark { width: 48px; height: 48px; border-radius: 12px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 18px; margin: 0 auto 10px; }
+  .about-hero h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .about-hero p { font-size: 11px; color: #888; line-height: 1.6; }
+  .about-badge { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
+  .about-divider { height: 1px; background: #eee; margin: 14px 0; }
+  .about-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; }
+  .about-row .label { color: #888; }
+  .about-row .value { font-weight: 500; }
+  .about-note { font-size: 11px; color: #aaa; line-height: 1.6; margin-top: 12px; text-align: center; }
+  .about-link { color: #1a1a1a; font-weight: 600; text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<div class="compat-banner">
-  ⚠️ Currently compatible with <strong>Windows only</strong> · Requires <strong>VS Code</strong> + <strong>Microsoft Edge or Chrome</strong> · Mac / iOS support coming soon
-</div>
-
-<nav>
-  <a href="#" class="nav-logo">Guidance</a>
-  <ul class="nav-links">
-    <li><a href="#how">How it works</a></li>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#install">Install</a></li>
-    <li><a href="#reviews">Reviews</a></li>
-    <li><a href="#faq">FAQ</a></li>
-  </ul>
-</nav>
-
-<div style="text-align:center;padding:0.5rem 1rem;background:#e8f5e9;border-bottom:1px solid #c8e6c9;font-size:0.83rem;color:#2e7d32;font-weight:600;">
-  🎉 Free during beta — no licence required
-</div>
-
-<div class="hero">
-  <p class="hero-eyebrow">Works with ChatGPT · Claude · Grok · Gemini</p>
-  <h1>Your AI told you what to fix. <em>Now find it.</em></h1>
-  <p>Guidance watches your AI coding assistant and highlights exactly which file to open, which lines to delete, and which lines to insert — directly in VS Code.</p>
-  <a href="#install" class="btn-primary">Install Free</a>
-</div>
-
-<div style="max-width:680px;margin:0 auto;padding:0 2rem 4rem;">
-  <div class="demo-block">
-    <div class="demo-label">ChatGPT response</div>
-    <p>In your <code>index.html</code> file, replace the console.log with a logger call and update the port to use the variable:</p>
-    <br>
-    <div>// C:\Projects\Aura\index.html</div>
-    <div class="del">- console.log("Server starting...");</div>
-    <div class="ins">+ logger.info(`Port ${port}`);</div>
-    <div class="demo-divider"></div>
-    <div><span class="dbadge">Guidance ✓</span> <code>index.html</code> → sent to VS Code</div>
-    <br>
-    <div class="demo-label">VS Code — index.html</div>
-    <div class="demo-row">
-      <div class="demo-col">
-        <div style="color:#aaa">main.js</div>
-        <div style="background:#fff3cd;padding:2px 4px;border-radius:3px;"><strong>index.html ← go here</strong></div>
-      </div>
-      <div class="demo-col">
-        <div style="color:#aaa">4 &nbsp; const port = 3000;</div>
-        <div style="color:#c0392b;text-decoration:line-through">5 &nbsp; console.log("Server...");</div>
-        <div style="color:#27ae60">6 &nbsp; logger.info(`Port ${port}`);</div>
-        <div style="color:#aaa">7</div>
-        <div style="color:#aaa">8 &nbsp; app.listen(3000, cb);</div>
-      </div>
-    </div>
-    <div class="demo-divider"></div>
-    <div style="font-family:-apple-system,sans-serif;font-size:0.78rem;color:#888">Press Ctrl+S to clear highlights</div>
+<div class="header">
+  <div class="header-top">
+    <span class="logo">Guidance</span>
+    <span>
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-text" id="statusText">Waiting for VS Code…</span>
+    </span>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('queue', this)">Queue</div>
+    <div class="tab" onclick="showTab('about', this)">About</div>
   </div>
 </div>
 
-<section id="problem">
-  <p style="font-size:1.4rem;font-weight:700;text-align:center;margin-bottom:0.5rem;">The Problem</p>
-  <p style="text-align:center;color:#666;margin-bottom:2.5rem;">"The AI told me what to change — but I have no idea which file to open or where to find the line."</p>
-  <p style="max-width:680px;margin:0 auto 2.5rem;text-align:center;color:#555;">You're not a senior developer. You use AI to build things. The AI gives you code — but then leaves you staring at 20 open tabs, trying to figure out where exactly to paste it. Guidance is the missing bridge.</p>
-  <div class="problem-grid">
-    <div class="problem-card"><div class="icon">😩</div><h3>Wrong file, wasted time</h3><p>Editing the wrong version of a file, then wondering why the change did nothing.</p></div>
-    <div class="problem-card"><div class="icon">🔍</div><h3>Ctrl+F hunting through 500 lines</h3><p>The AI says "find the body tag" — but your index.html is 600 lines long.</p></div>
-    <div class="problem-card"><div class="icon">💥</div><h3>Breaking things by guessing</h3><p>Pasting code in the wrong place and breaking something that was already working.</p></div>
+<div class="panel active" id="panel-queue">
+  <div class="connection-bar">
+    <span class="ci">🔌</span>
+    <p><strong id="vsCodeStatus">VS Code: not connected</strong><br>Open VS Code with the Guidance extension running.</p>
   </div>
-</section>
-
-<section id="how" style="background:#fafafa;max-width:100%;padding:5rem 2rem;">
-  <div style="max-width:960px;margin:0 auto;">
-    <h2>Four steps. Zero guesswork.</h2>
-    <p class="section-sub">Guidance runs silently in the background. You just code normally — it handles the navigation.</p>
-    <div class="steps">
-      <div class="step"><div class="step-num">01</div><div class="step-icon">🤖</div><h3>Ask your AI</h3><p>Ask ChatGPT, Claude, Grok or Gemini for a code change as you normally would.</p></div>
-      <div class="step"><div class="step-num">02</div><div class="step-icon">👁️</div><h3>Guidance detects it</h3><p>The browser extension automatically reads the AI response and identifies the file and lines to change.</p></div>
-      <div class="step"><div class="step-num">03</div><div class="step-icon">✨</div><h3>VS Code lights up</h3><p>The right file opens. The tab glows. Red lines show what to delete, green shows what to insert.</p></div>
-      <div class="step"><div class="step-num">04</div><div class="step-icon">💾</div><h3>Save to clear</h3><p>Make the edit. Press Ctrl+S. The highlights disappear and the patch is marked done.</p></div>
+  <div id="queueContent">
+    <div class="queue-empty">
+      <div class="q-icon">📋</div>
+      <p>No patches queued.<br>Ask an AI for a code change<br>and Guidance will pick it up automatically.</p>
     </div>
   </div>
-</section>
+</div>
 
-<section id="features">
-  <h2>Everything you need. Nothing you don't.</h2>
-  <p class="section-sub">All features are free during the beta.</p>
-  <div class="features-grid">
-    <div class="feature"><div class="ficon">🎯</div><h3>Tab glow + arrow indicator</h3><p>The exact VS Code tab you need glows amber. If it's off screen, an arrow shows which direction to scroll.</p></div>
-    <div class="feature"><div class="ficon">🔴</div><h3>Line-level highlights</h3><p>Red for delete. Green for insert. Amber for edit. Every line that needs changing is marked inline.</p></div>
-    <div class="feature"><div class="ficon">🧠</div><h3>Works with 4 AI platforms</h3><p>ChatGPT, Claude, Grok and Gemini — watches all of them simultaneously and picks up code instructions automatically.</p></div>
-    <div class="feature"><div class="ficon">🎨</div><h3>Project colour coding</h3><p>Assign colours to projects so your VS Code tabs are always colour-coded by project.</p></div>
-    <div class="feature"><div class="ficon">📋</div><h3>Patch queue</h3><p>All pending changes sit in a queue. Work through them one by one — each patch shows the file, lines, and original instruction.</p></div>
-    <div class="feature"><div class="ficon">⚡</div><h3>Auto-clear on save</h3><p>When you save with Ctrl+S, highlights clear automatically and the patch is marked done. No manual cleanup.</p></div>
+<div class="panel" id="panel-about">
+  <div class="about-hero">
+    <div class="about-logo-mark">G</div>
+    <h2>Guidance</h2>
+    <p>Visual Coding Co-pilot<br>by CAPITL RSA</p>
+    <span class="about-badge">🎉 Free Beta</span>
   </div>
-</section>
-
-<section id="install" style="background:#fafafa;max-width:100%;padding:5rem 2rem;">
-  <div style="max-width:960px;margin:0 auto;">
-    <h2>Up and running in 5 minutes.</h2>
-    <p class="section-sub">Two things to install — the browser extension and the VS Code extension.</p>
-    <div class="req-box">
-      <h3>💻 System Requirements</h3>
-      <div class="req-grid">
-        <dl class="req-item"><dt>Operating System</dt><dd>Windows 10 or 11<br><small style="color:#aaa">Mac / iOS — coming soon</small></dd></dl>
-        <dl class="req-item"><dt>Browser</dt><dd>Microsoft Edge or Chrome<br><small style="color:#aaa">Firefox not supported yet</small></dd></dl>
-        <dl class="req-item"><dt>Storage Required</dt><dd>~800MB free space<br><small style="color:#aaa">VS Code ~350MB · Node.js ~300MB · Extensions ~5MB</small></dd></dl>
-      </div>
-    </div>
-    <div class="install-tabs">
-      <button class="install-tab active" onclick="switchTab(this,'browser')">1. Browser Extension</button>
-      <button class="install-tab" onclick="switchTab(this,'vscode')">2. VS Code Extension</button>
-    </div>
-    <div class="install-panel active" id="panel-browser">
-      <ol class="step-list">
-        <li><div><h3>Download the browser extension</h3><p>Download the Guidance browser extension zip file. File size is approximately 20KB.</p><a href="https://github.com/KelTech-ZA/Guidance/raw/main/BROWSER-guidance-extension.zip" class="dl-btn">Download Browser Extension</a></div></li>
-        <li><div><h3>Unzip the file</h3><p>Right-click the downloaded zip → <code>Extract All</code> → <code>Extract</code>. Move the extracted folder somewhere permanent like <code>C:\Users\YourName\guidance-browser</code>. Do not delete this folder after installing.</p></div></li>
-        <li><div><h3>Load into Edge or Chrome</h3><p>Open <code>edge://extensions</code> or <code>chrome://extensions</code> → Toggle <strong>Developer mode</strong> ON → Click <strong>Load unpacked</strong> → Select the extracted folder → Click <strong>Select Folder</strong>.</p></div></li>
-        <li><div><h3>Pin Guidance to your toolbar</h3><p>Click the puzzle piece 🧩 icon in your browser toolbar → Find <strong>Guidance — Visual Coding Co-pilot</strong> → Click the pin icon.</p></div></li>
-      </ol>
-    </div>
-    <div class="install-panel" id="panel-vscode">
-      <ol class="step-list">
-        <li><div><h3>Install VS Code (required)</h3><p>Download VS Code free from <code>code.visualstudio.com</code>. Requires approximately 350MB of free space.</p></div></li>
-        <li><div><h3>Install Node.js (required)</h3><p>Download the LTS version from <code>nodejs.org</code>. Choose the Windows installer. Skip if already installed.</p></div></li>
-        <li><div>
-          <h3>Download the VS Code extension</h3>
-          <p>Download the Guidance VS Code extension zip file below. File size is approximately 10KB.</p>
-          <a href="https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" class="dl-btn">Download VS Code Extension</a>
-          <p class="ps-warning">⚠️ If your browser blocks the download, open <strong>PowerShell as Administrator</strong> and run this command instead:</p>
-          <div class="ps-box">Invoke-WebRequest -Uri "https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" -OutFile "$env:USERPROFILE\Downloads\VSCODE-guidance-extension.zip"</div>
-        </div></li>
-        <li><div><h3>Install the VS Code extension</h3><p>Unzip the downloaded file. Open VS Code → press <code>Ctrl+`</code> to open the Terminal → run these two commands one at a time:</p><p style="margin-top:0.5rem"><code>xcopy /e /i /y "C:\Users\YourName\Downloads\VSCODE-guidance-extension" "C:\Users\YourName\.vscode\extensions\guidance-vscode"</code></p><p style="margin-top:0.5rem">Then: <code>cd "%USERPROFILE%\.vscode\extensions\guidance-vscode" &amp;&amp; npm install ws</code></p><p style="margin-top:0.5rem">Close and reopen VS Code. You'll see <strong>Guidance: ready</strong> in the bottom status bar.</p></div></li>
-        <li><div><h3>Open your project in VS Code</h3><p>In VS Code: <code>File → Open Folder</code> → select your project folder. The status bar will show <strong>Guidance: browser connected</strong> once the browser extension is also running.</p></div></li>
-        <li><div><h3>Assign project colours (optional)</h3><p>Press <code>Ctrl+Shift+P</code> → type <code>Guidance: Assign Colour</code> → select your project → pick a colour.</p></div></li>
-      </ol>
-    </div>
-  </div>
-</section>
-
-<section id="faq">
-  <h2>Common questions</h2>
-  <details><summary>Does Guidance work on Mac or iOS?</summary><p>Not yet. Windows 10 and 11 only. Mac and iOS support is planned for a future release.</p></details>
-  <details><summary>Do I need VS Code? Can I use Notepad++ instead?</summary><p>Yes — VS Code is required. It needs to communicate directly with the editor to show highlights. VS Code is free and opens all the same file types as Notepad++.</p></details>
-  <details><summary>How much storage space do I need?</summary><p>Approximately 800MB total: VS Code (~350MB), Node.js (~300MB), and the extensions (~5MB). If you already have VS Code and Node.js, you only need 5MB.</p></details>
-  <details><summary>Do I need to understand coding to use Guidance?</summary><p>No. Guidance is built for people who use AI to write code but struggle with where to apply the changes. You don't need to understand the code — Guidance shows you exactly where to paste it.</p></details>
-  <details><summary>Which AI platforms does it work with?</summary><p>ChatGPT (chatgpt.com), Claude (claude.ai), Grok (grok.com) and Gemini (gemini.google.com). It works with all of them simultaneously.</p></details>
-  <details><summary>Is my code sent anywhere?</summary><p>No. Everything runs on your local machine over a local WebSocket connection — your code never leaves your computer.</p></details>
-  <details><summary>My browser is blocking the VS Code extension download. What do I do?</summary><p>This is a known false positive from Windows Defender. Open <strong>PowerShell as Administrator</strong> and run this command to download it directly:</p><div class="ps-box" style="margin-top:0.5rem;">Invoke-WebRequest -Uri "https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" -OutFile "$env:USERPROFILE\Downloads\VSCODE-guidance-extension.zip"</div></details>
-</section>
-
-<section id="reviews" style="background:#fafafa;max-width:100%;padding:5rem 2rem;">
-  <div style="max-width:960px;margin:0 auto;">
-    <h2>What users are saying.</h2>
-    <p class="section-sub">Early testers share their experience with Guidance.</p>
-    <div id="reviewSummary" style="margin-bottom:1.5rem;display:flex;align-items:center;gap:8px;"></div>
-    <div id="reviewsLoading" style="color:#aaa;font-size:0.9rem;">Loading reviews…</div>
-    <div id="reviewsList"></div>
-    <div id="noReviews" style="display:none;color:#aaa;font-size:0.9rem;">No reviews yet — be the first to leave one below!</div>
-    <div class="review-form">
-      <h3>Leave a review</h3>
-      <p style="font-size:0.88rem;color:#666;margin-bottom:1.25rem;">Tried Guidance? Tell us what you think — good or bad. Your feedback shapes the product.</p>
-      <div class="form-row"><label>Your name</label><input type="text" id="reviewName" placeholder="Jane Smith" /></div>
-      <div class="form-row">
-        <label>Rating</label>
-        <div style="display:flex;gap:6px;">
-          <span class="star" onclick="setRating(1)">★</span>
-          <span class="star" onclick="setRating(2)">★</span>
-          <span class="star" onclick="setRating(3)">★</span>
-          <span class="star" onclick="setRating(4)">★</span>
-          <span class="star" onclick="setRating(5)">★</span>
-        </div>
-      </div>
-      <div class="form-row"><label>Your review</label><textarea id="reviewText" placeholder="What did you think?"></textarea></div>
-      <button class="btn-submit" onclick="submitReview()">Submit Review →</button>
-      <p class="review-success" id="reviewSuccess"></p>
-      <p class="review-error" id="reviewError"></p>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <p style="font-weight:700;margin-bottom:0.5rem;">Guidance</p>
-  <p style="color:#aaa;font-size:0.8rem;margin-bottom:1rem;">Visual Coding Co-pilot — by CAPITL</p>
-  <div class="footer-links">
-    <a href="#how">How it works</a>
-    <a href="#install">Install</a>
-    <a href="#faq">FAQ</a>
-    <a href="https://www.capitlrsa.com">capitlrsa.com</a>
-    <a href="mailto:support@capitlrsa.com">Support</a>
-  </div>
-  <p>© 2026 CAPITL. All rights reserved. · Guidance is a product of CAPITL RSA.</p>
-</footer>
+  <div class="about-divider"></div>
+  <div class="about-row"><span class="label">Version</span><span class="value" id="extVersion">—</span></div>
+  <div class="about-row"><span class="label">Tier</span><span class="value" style="color:#2e7d32;">Free Beta</span></div>
+  <div class="about-row"><span class="label">AI platforms</span><span class="value">ChatGPT, Claude, Grok, Gemini</span></div>
+  <div class="about-row"><span class="label">Editor</span><span class="value">VS Code (Windows)</span></div>
+  <div class="about-divider"></div>
+  <p class="about-note">
+    All features are free during the beta testing phase.<br>
+    No licence key required.<br><br>
+    Questions? <a href="mailto:support@capitlrsa.com" class="about-link">support@capitlrsa.com</a><br>
+    <a href="https://keltech-za.github.io/Guidance" target="_blank" class="about-link">keltech-za.github.io/Guidance</a>
+  </p>
+</div>
 
 <script>
-const BACKEND = 'https://guidance-backend-396822769279.us-central1.run.app';
-
-let currentRating = 0;
-
-function setRating(val) {
-  currentRating = val;
-  document.querySelectorAll('.star').forEach((s, i) => {
-    s.style.opacity = i < val ? '1' : '0.3';
-    s.style.color = i < val ? '#EF9F27' : 'inherit';
-  });
-}
-
-async function submitReview() {
-  const name = document.getElementById('reviewName').value.trim();
-  const text = document.getElementById('reviewText').value.trim();
-  const errEl = document.getElementById('reviewError');
-  const successEl = document.getElementById('reviewSuccess');
-  const btn = document.querySelector('#reviews button');
-  errEl.style.display = 'none';
-  successEl.style.display = 'none';
-  if (!name) { errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
-  if (!text || text.length < 10) { errEl.textContent = 'Please write a review of at least 10 characters.'; errEl.style.display = 'block'; return; }
-  if (currentRating === 0) { errEl.textContent = 'Please select a star rating.'; errEl.style.display = 'block'; return; }
-  btn.textContent = 'Submitting…';
-  btn.disabled = true;
-  try {
-    const res = await fetch(`${BACKEND}/reviews/submit`, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ name, review_text: text, rating: currentRating, tier: 'Free' })
-    });
-    if (!res.ok) throw new Error('Server error ' + res.status);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    document.getElementById('reviewName').value = '';
-    document.getElementById('reviewText').value = '';
-    setRating(0);
-    successEl.textContent = '✓ Thank you! Your review has been submitted and will appear once approved.';
-    successEl.style.display = 'block';
-  } catch(e) {
-    errEl.textContent = 'Could not submit — please email your review to support@capitlrsa.com';
-    errEl.style.display = 'block';
-  }
-  btn.textContent = 'Submit Review →';
-  btn.disabled = false;
-}
-
-async function loadReviews() {
-  try {
-    const res = await fetch(`${BACKEND}/reviews`, {
-      method: 'GET',
-      mode: 'cors',
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('Failed');
-    const data = await res.json();
-    renderReviews(data.reviews || []);
-  } catch(e) {
-    console.error('Load reviews error:', e);
-    renderReviews([]);
-  }
-}
-
-function renderReviews(reviews) {
-  const list = document.getElementById('reviewsList');
-  const noReviews = document.getElementById('noReviews');
-  const loading = document.getElementById('reviewsLoading');
-  if (loading) loading.style.display = 'none';
-  list.querySelectorAll('.review-card').forEach(e => e.remove());
-  if (reviews.length === 0) { noReviews.style.display = 'block'; return; }
-  noReviews.style.display = 'none';
-  const avg = (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1);
-  const summaryEl = document.getElementById('reviewSummary');
-  if (summaryEl) {
-    summaryEl.innerHTML = `<span style="font-size:28px;font-weight:800">${avg}</span>
-      <span style="color:#EF9F27;font-size:20px;margin:0 6px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span>
-      <span style="font-size:13px;color:#888">${reviews.length} review${reviews.length !== 1 ? 's' : ''}</span>`;
-  }
-  reviews.forEach(r => {
-    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-    const date = new Date(r.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
-    const card = document.createElement('div');
-    card.className = 'review-card';
-    card.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:50%;background:#EEEDFE;color:#534AB7;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${r.name.charAt(0).toUpperCase()}</div>
-          <div>
-            <div style="font-size:14px;font-weight:700">${r.name}</div>
-            <div style="font-size:11px;color:#aaa">${date}</div>
-          </div>
-        </div>
-        <div style="color:#EF9F27;font-size:18px;letter-spacing:2px">${stars}</div>
-      </div>
-      <div style="font-size:14px;color:#444;line-height:1.6">${r.review_text}</div>`;
-    list.appendChild(card);
-  });
-}
-
-function switchTab(btn, name) {
-  document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+function showTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   btn.classList.add('active');
 }
 
-loadReviews();
+try {
+  const manifest = chrome.runtime.getManifest();
+  document.getElementById('extVersion').textContent = manifest.version || '—';
+} catch(e) {}
+
+try {
+  chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (resp) => {
+    if (resp && resp.connected) {
+      document.getElementById('statusDot').classList.add('connected');
+      document.getElementById('statusText').textContent = 'VS Code connected';
+      document.getElementById('vsCodeStatus').textContent = 'VS Code: connected ✓';
+    }
+  });
+} catch(e) {}
 </script>
 
 </body>
