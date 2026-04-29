@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guidance</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 340px; min-height: 420px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #1a1a1a; background: #fff; }
+
+  .header { padding: 12px 16px 0; border-bottom: 1px solid #eee; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .logo { font-weight: 700; font-size: 14px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; display: inline-block; margin-right: 5px; }
+  .status-dot.connected { background: #4caf50; }
+  .status-text { font-size: 11px; color: #666; }
+
+  .tabs { display: flex; }
+  .tab { flex: 1; text-align: center; padding: 7px 0; font-size: 12px; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+  .tab:hover:not(.active) { color: #555; }
+
+  .panel { display: none; padding: 14px 16px; }
+  .panel.active { display: block; }
+
+  .queue-empty { text-align: center; padding: 32px 16px; color: #aaa; }
+  .queue-empty .q-icon { font-size: 2rem; margin-bottom: 8px; }
+  .queue-empty p { font-size: 12px; line-height: 1.6; }
+
+  .connection-bar { background: #f0f4ff; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .connection-bar .ci { font-size: 13px; }
+  .connection-bar p { font-size: 11px; color: #444; line-height: 1.4; }
+  .connection-bar p strong { color: #1a1a1a; }
+
+  .about-hero { text-align: center; padding: 20px 8px 16px; }
+  .about-logo-mark { width: 48px; height: 48px; border-radius: 12px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 18px; margin: 0 auto 10px; }
+  .about-hero h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .about-hero p { font-size: 11px; color: #888; line-height: 1.6; }
+  .about-badge { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-top: 8px; }
+  .about-divider { height: 1px; background: #eee; margin: 14px 0; }
+  .about-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; }
+  .about-row .label { color: #888; }
+  .about-row .value { font-weight: 500; }
+  .about-note { font-size: 11px; color: #aaa; line-height: 1.6; margin-top: 12px; text-align: center; }
+  .about-link { color: #1a1a1a; font-weight: 600; text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <span class="logo">Guidance</span>
+    <span>
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-text" id="statusText">Waiting for VS Code…</span>
+    </span>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('queue', this)">Queue</div>
+    <div class="tab" onclick="showTab('about', this)">About</div>
+  </div>
+</div>
+
+<div class="panel active" id="panel-queue">
+  <div class="connection-bar">
+    <span class="ci">🔌</span>
+    <p><strong id="vsCodeStatus">VS Code: not connected</strong><br>Open VS Code with the Guidance extension running.</p>
+  </div>
+  <div id="queueContent">
+    <div class="queue-empty">
+      <div class="q-icon">📋</div>
+      <p>No patches queued.<br>Ask an AI for a code change<br>and Guidance will pick it up automatically.</p>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-about">
+  <div class="about-hero">
+    <div class="about-logo-mark">G</div>
+    <h2>Guidance</h2>
+    <p>Visual Coding Co-pilot<br>by CAPITL RSA</p>
+    <span class="about-badge">🎉 Free Beta</span>
+  </div>
+  <div class="about-divider"></div>
+  <div class="about-row"><span class="label">Version</span><span class="value" id="extVersion">—</span></div>
+  <div class="about-row"><span class="label">Tier</span><span class="value" style="color:#2e7d32;">Free Beta</span></div>
+  <div class="about-row"><span class="label">AI platforms</span><span class="value">ChatGPT, Claude, Grok, Gemini</span></div>
+  <div class="about-row"><span class="label">Editor</span><span class="value">VS Code (Windows)</span></div>
+  <div class="about-divider"></div>
+  <p class="about-note">
+    All features are free during the beta testing phase.<br>
+    No licence key required.<br><br>
+    Questions? <a href="mailto:support@capitlrsa.com" class="about-link">support@capitlrsa.com</a><br>
+    <a href="https://keltech-za.github.io/Guidance" target="_blank" class="about-link">keltech-za.github.io/Guidance</a>
+  </p>
+</div>
+
+<script>
+function showTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+try {
+  const manifest = chrome.runtime.getManifest();
+  document.getElementById('extVersion').textContent = manifest.version || '—';
+} catch(e) {}
+
+try {
+  chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (resp) => {
+    if (resp && resp.connected) {
+      document.getElementById('statusDot').classList.add('connected');
+      document.getElementById('statusText').textContent = 'VS Code connected';
+      document.getElementById('vsCodeStatus').textContent = 'VS Code: connected ✓';
+    }
+  });
+} catch(e) {}
+</script>
+
+</body>
+</html>
