@@ -1,1373 +1,301 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Guidance — Visual Coding Co-pilot</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --ink: #0E0D1A;
-  --ink2: #2A2840;
-  --paper: #F5F4EF;
-  --accent: #534AB7;
-  --accent2: #AFA9EC;
-  --accent3: #EEEDFE;
-  --green: #1D9E75;
-  --amber: #EF9F27;
-  --red: #A32D2D;
-  --border: rgba(14,13,26,0.1);
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; line-height: 1.6; color: #1a1a1a; background: #fff; }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; }
 
-*{box-sizing:border-box;margin:0;padding:0}
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.96); backdrop-filter: blur(8px); border-bottom: 1px solid #eee; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .nav-logo { font-weight: 700; font-size: 1.1rem; }
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; list-style: none; font-size: 0.9rem; }
+  .nav-links a { color: #555; transition: color 0.2s; }
+  .nav-links a:hover { color: #000; }
 
-html{scroll-behavior:smooth}
+  section { padding: 5rem 2rem; max-width: 960px; margin: 0 auto; }
+  h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .section-sub { color: #666; margin-bottom: 3rem; font-size: 1.05rem; }
 
-body{
-  font-family:'DM Sans',sans-serif;
-  background:var(--paper);
-  color:var(--ink);
-  overflow-x:hidden;
-}
+  .compat-banner { background: #fff8e1; border-bottom: 1px solid #ffe082; text-align: center; padding: 0.6rem 1rem; font-size: 0.85rem; color: #5d4037; }
+  .compat-banner strong { color: #4e342e; }
 
-/* ── NOISE TEXTURE OVERLAY ── */
-body::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;
-  z-index:1000;
-  opacity:0.4;
-}
+  .hero { text-align: center; padding: 6rem 2rem 4rem; max-width: 760px; margin: 0 auto; }
+  .hero-eyebrow { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em; color: #888; text-transform: uppercase; margin-bottom: 1rem; }
+  .hero h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.25rem; }
+  .hero h1 em { font-style: italic; }
+  .hero p { font-size: 1.15rem; color: #444; max-width: 560px; margin: 0 auto 2.5rem; }
+  .btn-primary { display: inline-block; background: #1a1a1a; color: #fff; padding: 0.85rem 2.2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; transition: background 0.2s, transform 0.15s; }
+  .btn-primary:hover { background: #333; transform: translateY(-1px); }
+  .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
-/* ── NAV ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 48px;
-  background:rgba(245,244,239,0.85);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-}
+  .demo-block { background: #f8f8f8; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1.5rem; max-width: 640px; margin: 3rem auto 0; font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.7; text-align: left; }
+  .demo-label { font-family: -apple-system, sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #999; margin-bottom: 0.5rem; }
+  .demo-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .demo-col { flex: 1; min-width: 180px; }
+  .demo-divider { height: 1px; background: #e4e4e4; margin: 1rem 0; }
+  .del { color: #c0392b; } .ins { color: #27ae60; }
+  .badge { display: inline-block; font-family: -apple-system, sans-serif; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #e8f5e9; color: #2e7d32; margin-bottom: 0.5rem; }
 
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-icon{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--accent);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.nav-logo-text{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--ink)}
-.nav-links{display:flex;align-items:center;gap:32px}
-.nav-links a{font-size:14px;color:var(--ink2);text-decoration:none;opacity:0.7;transition:opacity .2s}
-.nav-links a:hover{opacity:1}
-.nav-cta{
-  font-family:'Syne',sans-serif;
-  font-size:13px;font-weight:600;
-  padding:9px 20px;border-radius:8px;
-  background:var(--accent);color:#fff;
-  text-decoration:none;
-  transition:background .2s,transform .15s;
-}
-.nav-cta:hover{background:var(--ink);transform:translateY(-1px)}
+  .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+  .problem-card { background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 1.5rem; }
+  .problem-card .icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+  .problem-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .problem-card p { font-size: 0.9rem; color: #666; }
 
-/* ── HERO ── */
-.hero{
-  min-height:100vh;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:120px 48px 80px;
-  text-align:center;
-  position:relative;
-  overflow:hidden;
-}
+  #how { background: #fafafa; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 2rem; }
+  .step { text-align: center; }
+  .step-num { font-size: 0.75rem; font-weight: 700; color: #aaa; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .step-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .step p { font-size: 0.88rem; color: #666; }
 
-.hero-bg{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(83,74,183,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(29,158,117,0.08) 0%, transparent 60%);
-  pointer-events:none;
-}
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+  .feature { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 1.5rem; }
+  .feature .ficon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .feature h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .feature p { font-size: 0.88rem; color: #666; }
 
-.hero-badge{
-  display:inline-flex;align-items:center;gap:7px;
-  font-family:'DM Mono',monospace;font-size:11px;font-weight:500;
-  padding:6px 14px;border-radius:20px;
-  background:var(--accent3);color:var(--accent);
-  border:1px solid var(--accent2);
-  margin-bottom:32px;
-  opacity:0;animation:fadeUp .6s .1s forwards;
-}
+  #install { background: #fafafa; }
+  .install-tabs { display: flex; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; width: fit-content; margin-bottom: 2rem; }
+  .install-tab { padding: 0.6rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; background: #fff; border: none; color: #666; transition: background 0.15s; }
+  .install-tab.active { background: #1a1a1a; color: #fff; }
+  .install-panel { display: none; }
+  .install-panel.active { display: block; }
+  .req-box { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
+  .req-box h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; }
+  .req-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+  .req-item dt { font-size: 0.75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+  .req-item dd { font-size: 0.88rem; color: #333; }
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; display: flex; gap: 1.25rem; margin-bottom: 1.75rem; align-items: flex-start; }
+  .step-list li::before { content: counter(steps); display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: #1a1a1a; color: #fff; font-size: 0.78rem; font-weight: 700; }
+  .step-list li > div h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .step-list li > div p { font-size: 0.88rem; color: #555; }
+  code { background: #f0f0f0; border-radius: 4px; padding: 1px 5px; font-size: 0.85em; font-family: 'Courier New', monospace; }
+  .dl-btn { display: inline-block; background: #1a1a1a; color: #fff; padding: 0.65rem 1.4rem; border-radius: 6px; font-size: 0.88rem; font-weight: 600; margin-top: 0.6rem; }
 
-.hero-badge-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--green);
-  animation:pulse 2s ease-in-out infinite;
-}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  details { border: 1px solid #eee; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+  details summary { font-weight: 600; font-size: 0.95rem; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details summary::after { content: '▼'; font-size: 0.7rem; color: #aaa; transition: transform 0.2s; }
+  details[open] summary::after { transform: rotate(180deg); }
+  details p { margin-top: 0.75rem; font-size: 0.9rem; color: #555; line-height: 1.7; }
 
-h1{
-  font-family:'Syne',sans-serif;
-  font-size:clamp(42px,7vw,88px);
-  font-weight:800;line-height:1.0;
-  letter-spacing:-0.03em;
-  max-width:900px;
-  margin-bottom:24px;
-  opacity:0;animation:fadeUp .7s .2s forwards;
-}
+  #reviews { background: #fafafa; }
+  .review-form { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 2rem; margin-top: 2rem; }
+  .review-form h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; }
+  .form-row { margin-bottom: 1rem; }
+  .form-row label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; color: #444; }
+  .form-row input, .form-row textarea { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.9rem; font-family: inherit; }
+  .form-row textarea { min-height: 100px; resize: vertical; }
+  .star-group { display: flex; gap: 0.5rem; font-size: 1.5rem; }
+  .btn-submit { background: #1a1a1a; color: #fff; border: none; padding: 0.7rem 1.6rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+  .review-success { display: none; color: #2e7d32; font-weight: 600; margin-top: 0.75rem; font-size: 0.9rem; }
 
-h1 em{
-  font-style:normal;
-  color:var(--accent);
-  position:relative;
-}
+  footer { border-top: 1px solid #eee; padding: 2rem; text-align: center; font-size: 0.82rem; color: #888; }
+  footer a { color: #888; }
+  footer a:hover { color: #333; }
+  .footer-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
 
-h1 em::after{
-  content:'';
-  position:absolute;
-  bottom:-4px;left:0;right:0;height:3px;
-  background:var(--accent);
-  border-radius:2px;
-}
-
-.hero-sub{
-  font-size:clamp(16px,2vw,20px);
-  color:var(--ink2);opacity:0.65;
-  max-width:560px;line-height:1.6;
-  margin-bottom:48px;
-  opacity:0;animation:fadeUp .7s .3s forwards;
-}
-
-.hero-actions{
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
-  margin-bottom:72px;
-  opacity:0;animation:fadeUp .7s .4s forwards;
-}
-
-.btn-primary{
-  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
-  padding:14px 32px;border-radius:10px;
-  background:var(--accent);color:#fff;
-  text-decoration:none;border:none;cursor:pointer;
-  transition:all .2s;display:inline-flex;align-items:center;gap:8px;
-}
-.btn-primary:hover{background:var(--ink);transform:translateY(-2px);box-shadow:0 8px 24px rgba(83,74,183,0.3)}
-
-.btn-secondary{
-  font-family:'Syne',sans-serif;font-size:15px;font-weight:600;
-  padding:14px 28px;border-radius:10px;
-  background:transparent;color:var(--ink);
-  text-decoration:none;border:1.5px solid var(--border);
-  transition:all .2s;
-}
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
-
-.hero-price-note{
-  font-size:13px;color:var(--ink2);opacity:0.5;margin-top:12px;
-}
-
-/* ── HERO MOCKUP ── */
-.hero-mockup{
-  width:100%;max-width:860px;
-  border-radius:16px;overflow:hidden;
-  border:1px solid var(--border);
-  box-shadow:0 32px 80px rgba(14,13,26,0.12), 0 0 0 1px rgba(14,13,26,0.06);
-  opacity:0;animation:fadeUp .8s .5s forwards;
-  position:relative;
-}
-
-.mockup-bar{
-  background:#1E1D2E;
-  padding:10px 16px;
-  display:flex;align-items:center;gap:8px;
-}
-.mockup-dot{width:10px;height:10px;border-radius:50%}
-.mockup-title{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px}
-
-.mockup-body{
-  background:#16152A;
-  display:grid;grid-template-columns:1fr 1fr;
-  min-height:320px;
-}
-
-.mockup-ai{
-  padding:20px;border-right:1px solid rgba(255,255,255,0.06);
-}
-
-.mockup-ai-label{
-  font-family:'DM Mono',monospace;font-size:10px;
-  color:rgba(255,255,255,0.25);
-  margin-bottom:12px;letter-spacing:.06em;text-transform:uppercase;
-}
-
-.mockup-bubble{
-  background:rgba(255,255,255,0.05);
-  border-radius:10px;padding:12px 14px;
-  font-size:12px;color:rgba(255,255,255,0.7);
-  line-height:1.6;margin-bottom:10px;
-}
-
-.mockup-code{
-  background:rgba(83,74,183,0.2);
-  border:1px solid rgba(83,74,183,0.3);
-  border-radius:8px;padding:10px 12px;
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:#AFA9EC;line-height:1.7;
-}
-
-.mockup-banner{
-  background:rgba(83,74,183,0.15);
-  border-top:2px solid var(--accent);
-  padding:7px 12px;
-  font-family:'DM Mono',monospace;font-size:10px;
-  color:var(--accent2);
-  display:flex;align-items:center;gap:6px;
-}
-
-.mockup-editor{padding:20px}
-.mockup-editor-label{
-  font-family:'DM Mono',monospace;font-size:10px;
-  color:rgba(255,255,255,0.25);
-  margin-bottom:12px;letter-spacing:.06em;text-transform:uppercase;
-}
-
-.mockup-tab-bar{
-  display:flex;gap:4px;margin-bottom:12px;
-}
-.mockup-tab{
-  font-family:'DM Mono',monospace;font-size:10px;
-  padding:4px 10px;border-radius:5px;
-  display:flex;align-items:center;gap:5px;
-}
-.mockup-tab.active{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8)}
-.mockup-tab.glow{
-  background:rgba(239,159,39,0.15);
-  border:1px solid rgba(239,159,39,0.5);
-  color:#EF9F27;
-  animation:tabGlow 1.2s ease-in-out infinite;
-}
-@keyframes tabGlow{0%,100%{box-shadow:0 0 0 2px rgba(239,159,39,.15)}50%{box-shadow:0 0 0 3px rgba(239,159,39,.4)}}
-
-.mockup-line{
-  font-family:'DM Mono',monospace;font-size:11px;
-  display:flex;line-height:1.8;
-}
-.mockup-ln{width:28px;color:rgba(255,255,255,0.15);font-size:10px;flex-shrink:0;text-align:right;padding-right:8px}
-.mockup-lc{flex:1}
-.line-del{background:rgba(163,45,45,0.2)}.line-del .mockup-lc{color:#F09595;text-decoration:line-through}
-.line-del .mockup-lc::after{content:'  ← DELETE';color:#A32D2D;font-size:9px}
-.line-ins{background:rgba(29,158,117,0.15)}.line-ins .mockup-lc{color:#5DCAA5}
-.line-ins .mockup-lc::after{content:'  ← INSERT';color:#1D9E75;font-size:9px}
-.line-edit{animation:lineFlash 1.5s ease-in-out infinite}
-@keyframes lineFlash{0%,100%{background:rgba(239,159,39,0.1)}50%{background:rgba(239,159,39,0.22)}}
-.line-edit .mockup-lc::after{content:'  ← EDIT';color:#EF9F27;font-size:9px}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-
-/* ── SECTION BASE ── */
-section{padding:96px 48px}
-.section-label{
-  font-family:'DM Mono',monospace;font-size:11px;font-weight:500;
-  letter-spacing:.1em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:16px;
-}
-.section-title{
-  font-family:'Syne',sans-serif;font-size:clamp(30px,4vw,48px);
-  font-weight:800;letter-spacing:-0.02em;line-height:1.1;
-  margin-bottom:16px;
-}
-.section-sub{
-  font-size:17px;color:var(--ink2);opacity:0.6;
-  line-height:1.6;max-width:520px;
-}
-
-/* ── PROBLEM SECTION ── */
-.problem{background:var(--ink);color:#fff;position:relative;overflow:hidden}
-.problem::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 50% 60% at 0% 50%, rgba(83,74,183,0.2) 0%, transparent 70%);
-  pointer-events:none;
-}
-.problem .section-label{color:var(--accent2)}
-.problem .section-title{color:#fff}
-.problem .section-sub{color:rgba(255,255,255,0.5)}
-
-.problem-grid{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:48px;align-items:center;max-width:1100px;margin:0 auto;
-}
-
-.problem-quote{
-  font-family:'Syne',sans-serif;
-  font-size:clamp(20px,2.5vw,28px);
-  font-weight:600;line-height:1.45;
-  color:rgba(255,255,255,0.85);
-  border-left:3px solid var(--accent);
-  padding-left:24px;
-  margin-bottom:24px;
-}
-
-.problem-desc{font-size:16px;color:rgba(255,255,255,0.45);line-height:1.7}
-
-.problem-visual{
-  display:flex;flex-direction:column;gap:12px;
-}
-
-.pain-card{
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:12px;padding:16px 20px;
-  display:flex;align-items:flex-start;gap:14px;
-}
-.pain-icon{font-size:20px;flex-shrink:0;margin-top:2px}
-.pain-title{font-size:14px;font-weight:600;color:rgba(255,255,255,0.8);margin-bottom:4px}
-.pain-desc{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.5}
-
-/* ── HOW IT WORKS ── */
-.how{background:var(--paper)}
-.how-inner{max-width:1100px;margin:0 auto}
-.how-steps{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:2px;margin-top:56px;
-  border:1px solid var(--border);border-radius:16px;overflow:hidden;
-}
-.step{
-  padding:32px 28px;background:#fff;
-  border-right:1px solid var(--border);
-  transition:background .2s;
-}
-.step:last-child{border-right:none}
-.step:hover{background:var(--accent3)}
-.step-num{
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--accent);font-weight:500;
-  margin-bottom:16px;letter-spacing:.06em;
-}
-.step-icon{font-size:28px;margin-bottom:14px}
-.step-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px}
-.step-desc{font-size:13px;color:var(--ink2);opacity:0.6;line-height:1.6}
-
-/* ── FEATURES ── */
-.features{background:var(--paper)}
-.features-inner{max-width:1100px;margin:0 auto}
-.features-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:16px;margin-top:56px;
-}
-.feat-card{
-  background:#fff;border:1px solid var(--border);
-  border-radius:14px;padding:28px;
-  transition:all .2s;position:relative;overflow:hidden;
-}
-.feat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:var(--accent);transform:scaleX(0);transform-origin:left;
-  transition:transform .3s;
-}
-.feat-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(14,13,26,0.08)}
-.feat-card:hover::before{transform:scaleX(1)}
-.feat-icon{font-size:24px;margin-bottom:14px}
-.feat-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px}
-.feat-desc{font-size:13px;color:var(--ink2);opacity:0.6;line-height:1.6}
-
-/* ── PRICING ── */
-.pricing{background:var(--ink);color:#fff;overflow:hidden;position:relative}
-.pricing::after{
-  content:'';position:absolute;
-  bottom:-200px;right:-200px;
-  width:500px;height:500px;border-radius:50%;
-  background:rgba(83,74,183,0.15);
-  pointer-events:none;
-}
-.pricing-inner{max-width:900px;margin:0 auto;text-align:center}
-.pricing .section-label{color:var(--accent2)}
-.pricing .section-title{color:#fff}
-.pricing .section-sub{color:rgba(255,255,255,0.45);margin:0 auto 56px}
-
-.pricing-cards{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:16px;text-align:left;
-}
-.price-card{
-  border-radius:16px;padding:32px;
-  border:1px solid rgba(255,255,255,0.08);
-  background:rgba(255,255,255,0.03);
-  transition:all .2s;
-}
-.price-card:hover{border-color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)}
-.price-card.featured{
-  background:var(--accent);
-  border-color:var(--accent);
-  position:relative;overflow:hidden;
-}
-.price-card.featured::before{
-  content:'MOST POPULAR';
-  position:absolute;top:16px;right:-28px;
-  font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
-  background:#fff;color:var(--accent);
-  padding:4px 36px;transform:rotate(45deg);
-  letter-spacing:.06em;
-}
-.price-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;opacity:0.6;margin-bottom:8px}
-.price-amount{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;margin-bottom:4px;line-height:1;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1}
-.price-period{font-size:13px;opacity:0.5;margin-bottom:24px}
-.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
-.price-features li{font-size:13px;display:flex;align-items:center;gap:8px;opacity:0.75}
-.price-features li::before{
-  content:'✓';font-weight:700;
-  color:var(--green);flex-shrink:0;
-}
-.price-features li.off{opacity:0.3}
-.price-features li.off::before{content:'×';color:rgba(255,255,255,0.3)}
-.price-btn{
-  width:100%;padding:12px;border-radius:9px;
-  font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
-  border:none;cursor:pointer;text-align:center;
-  text-decoration:none;display:block;transition:all .2s;
-}
-.price-btn.free-btn{
-  background:rgba(255,255,255,0.08);color:#fff;
-  border:1px solid rgba(255,255,255,0.12);
-}
-.price-btn.free-btn:hover{background:rgba(255,255,255,0.14)}
-.price-btn.pro-btn{background:var(--ink);color:#fff}
-.price-btn.pro-btn:hover{background:#000;transform:translateY(-1px)}
-
-/* ── INSTALL ── */
-.install{background:var(--paper)}
-.install-inner{max-width:900px;margin:0 auto}
-.install-tabs{
-  display:flex;gap:2px;margin-bottom:32px;margin-top:48px;
-  background:rgba(14,13,26,0.05);border-radius:10px;padding:4px;
-  width:fit-content;
-}
-.install-tab{
-  font-family:'Syne',sans-serif;font-size:13px;font-weight:600;
-  padding:8px 20px;border-radius:7px;cursor:pointer;border:none;
-  background:transparent;color:var(--ink);opacity:0.4;transition:all .15s;
-}
-.install-tab.active{background:#fff;opacity:1;box-shadow:0 1px 4px rgba(14,13,26,0.1)}
-
-.install-panel{display:none}
-.install-panel.active{display:block}
-
-.install-steps{display:flex;flex-direction:column;gap:16px}
-.install-step{
-  display:flex;align-items:flex-start;gap:16px;
-  padding:20px 24px;background:#fff;
-  border:1px solid var(--border);border-radius:12px;
-}
-.install-step-num{
-  width:28px;height:28px;border-radius:50%;
-  background:var(--accent3);color:var(--accent);
-  font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.install-step-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:4px}
-.install-step-desc{font-size:13px;color:var(--ink2);opacity:0.6;line-height:1.5}
-.install-step-desc code{
-  font-family:'DM Mono',monospace;font-size:12px;
-  background:var(--accent3);color:var(--accent);
-  padding:1px 6px;border-radius:4px;
-}
-
-.download-btn{
-  display:inline-flex;align-items:center;gap:8px;
-  font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
-  padding:12px 24px;border-radius:9px;
-  background:var(--accent);color:#fff;
-  text-decoration:none;margin-top:12px;
-  transition:all .2s;
-}
-.download-btn:hover{background:var(--ink);transform:translateY(-1px)}
-
-/* ── FAQ ── */
-.faq{background:#fff}
-.faq-inner{max-width:720px;margin:0 auto}
-.faq-list{margin-top:48px;display:flex;flex-direction:column;gap:2px}
-.faq-item{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:4px}
-.faq-q{
-  width:100%;padding:18px 22px;
-  background:transparent;border:none;cursor:pointer;
-  font-family:'Syne',sans-serif;font-size:15px;font-weight:600;
-  color:var(--ink);text-align:left;
-  display:flex;justify-content:space-between;align-items:center;
-  transition:background .15s;
-}
-.faq-q:hover{background:var(--accent3)}
-.faq-q .arrow{transition:transform .2s;font-size:12px;opacity:0.4}
-.faq-item.open .faq-q{background:var(--accent3);color:var(--accent)}
-.faq-item.open .arrow{transform:rotate(180deg);opacity:1}
-.faq-a{
-  display:none;padding:0 22px 18px;
-  font-size:14px;color:var(--ink2);opacity:0.65;line-height:1.7;
-}
-.faq-item.open .faq-a{display:block}
-
-/* ── FOOTER ── */
-footer{
-  background:var(--ink);color:rgba(255,255,255,0.4);
-  padding:48px;text-align:center;
-}
-.footer-logo{
-  font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
-  color:#fff;margin-bottom:8px;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.footer-tagline{font-size:13px;margin-bottom:24px}
-.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:24px;flex-wrap:wrap}
-.footer-links a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:13px;transition:color .15s}
-.footer-links a:hover{color:#fff}
-.footer-copy{font-size:12px;opacity:0.4}
-
-/* ── PAYMENT MODAL ── */
-.modal-overlay{
-  display:none;position:fixed;inset:0;z-index:500;
-  background:rgba(14,13,26,0.7);backdrop-filter:blur(6px);
-  align-items:center;justify-content:center;
-}
-.modal-overlay.open{display:flex}
-.modal{
-  background:#fff;border-radius:20px;padding:40px;
-  width:100%;max-width:480px;margin:20px;
-  position:relative;
-}
-.modal-close{
-  position:absolute;top:16px;right:16px;
-  background:none;border:none;font-size:20px;cursor:pointer;
-  color:var(--ink);opacity:0.3;transition:opacity .15s;
-}
-.modal-close:hover{opacity:1}
-.modal h3{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
-.modal-sub{font-size:14px;color:var(--ink2);opacity:0.6;margin-bottom:28px}
-.form-row{margin-bottom:16px}
-.form-row label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
-.form-row input{
-  width:100%;padding:11px 14px;
-  border:1.5px solid var(--border);border-radius:9px;
-  font-size:14px;font-family:'DM Sans',sans-serif;
-  outline:none;transition:border-color .15s;
-  background:#fff;color:var(--ink);
-}
-.form-row input:focus{border-color:var(--accent)}
-.modal-submit{
-  width:100%;padding:13px;border-radius:9px;border:none;
-  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
-  background:var(--accent);color:#fff;cursor:pointer;
-  transition:background .2s;margin-top:8px;
-}
-.modal-submit:hover{background:var(--ink)}
-.modal-note{font-size:11px;color:var(--ink2);opacity:0.4;text-align:center;margin-top:12px;line-height:1.5}
-.modal-error{font-size:12px;color:#A32D2D;margin-top:8px;display:none}
-.modal-success{display:none;text-align:center;padding:20px 0}
-.modal-success-icon{font-size:48px;margin-bottom:12px}
-.modal-success h4{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:8px}
-.modal-success p{font-size:14px;color:var(--ink2);opacity:0.6;line-height:1.6}
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  nav{padding:16px 20px}
-  .nav-links{display:none}
-  .hero{padding:100px 20px 60px}
-  section{padding:64px 20px}
-  .problem-grid,.how-steps,.features-grid,.pricing-cards{grid-template-columns:1fr}
-  .how-steps{border-radius:12px}
-  .step{border-right:none;border-bottom:1px solid var(--border)}
-  footer{padding:40px 20px}
-}
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    .nav-links { gap: 0.9rem; font-size: 0.8rem; }
+    section { padding: 3.5rem 1rem; }
+    .hero { padding: 4rem 1rem 2.5rem; }
+  }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a href="#" class="nav-logo">
-    <div class="nav-logo-icon">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <circle cx="9" cy="9" r="7" stroke="white" stroke-width="1.5"/>
-        <path d="M6 9h6M9 6v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <span class="nav-logo-text">Guidance</span>
-  </a>
-  <div class="nav-links">
-    <a href="#how">How it works</a>
-    <a href="#features">Features</a>
-    <a href="#install">Install</a>
-    <a href="#pricing">Pricing</a>
-    <a href="#reviews">Reviews</a>
-    <a href="#faq">FAQ</a>
-  </div>
-  <a href="#pricing" class="nav-cta">Get Pro — R199</a>
-</nav>
-
-<!-- COMPATIBILITY NOTICE -->
-<div style="background:#1a1a2e;color:rgba(255,255,255,0.75);text-align:center;padding:10px 20px;font-size:12px;font-family:'DM Mono',monospace;letter-spacing:.03em;border-bottom:1px solid rgba(255,255,255,0.08)">
-  ⚠️ &nbsp;Currently compatible with <strong style="color:#fff">Windows only</strong> · Requires <strong style="color:#fff">VS Code</strong> + <strong style="color:#fff">Microsoft Edge or Chrome</strong> · Mac / iOS support coming soon
+<div class="compat-banner">
+  ⚠️ Currently compatible with <strong>Windows only</strong> · Requires <strong>VS Code</strong> + <strong>Microsoft Edge or Chrome</strong> · Mac / iOS support coming soon
 </div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-badge">
-    <span class="hero-badge-dot"></span>
-    Works with ChatGPT · Claude · Grok · Gemini
-  </div>
-  <h1>Your AI told you<br>what to fix. <em>Now find it.</em></h1>
-  <p class="hero-sub">Guidance watches your AI coding assistant and highlights exactly which file to open, which lines to delete, and which lines to insert — directly in VS Code.</p>
-  <div class="hero-actions">
-    <a href="#install" class="btn-primary">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 13h10" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Install Free
-    </a>
-    <a href="#pricing" class="btn-secondary">Get Pro — R199 once-off</a>
-  </div>
+<nav>
+  <a href="#" class="nav-logo">Guidance</a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+</nav>
 
-  <!-- LIVE MOCKUP -->
-  <div class="hero-mockup">
-    <div class="mockup-bar">
-      <div class="mockup-dot" style="background:#FF5F56"></div>
-      <div class="mockup-dot" style="background:#FFBD2E"></div>
-      <div class="mockup-dot" style="background:#27C93F"></div>
-      <span class="mockup-title">ChatGPT → Guidance → VS Code</span>
-    </div>
-    <div class="mockup-body">
-      <div class="mockup-ai">
-        <div class="mockup-ai-label">ChatGPT response</div>
-        <div class="mockup-bubble">In your <code style="background:rgba(83,74,183,0.3);color:#AFA9EC;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px">index.html</code> file, replace the console.log with a logger call and update the port to use the variable:</div>
-        <div class="mockup-code">
-          <div style="color:rgba(255,255,255,0.3);font-size:10px;margin-bottom:6px">// C:\Projects\Aura\index.html</div>
-          <div style="color:#F09595">- console.log("Server starting...");</div>
-          <div style="color:#5DCAA5">+ logger.info(`Port ${port}`);</div>
-        </div>
-        <div class="mockup-banner">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="#534AB7"/><path d="M5 4v2.5M5 3v.3" stroke="white" stroke-width="1" stroke-linecap="round"/></svg>
-          Guidance ✓ &nbsp;<code style="background:rgba(83,74,183,0.3);padding:1px 5px;border-radius:3px">index.html</code>&nbsp; → sent to VS Code
-        </div>
+<div style="text-align:center;padding:0.5rem 1rem;background:#e8f5e9;border-bottom:1px solid #c8e6c9;font-size:0.83rem;color:#2e7d32;font-weight:600;">
+  🎉 Free during beta — no licence required
+</div>
+
+<div class="hero">
+  <p class="hero-eyebrow">Works with ChatGPT · Claude · Grok · Gemini</p>
+  <h1>Your AI told you what to fix. <em>Now find it.</em></h1>
+  <p>Guidance watches your AI coding assistant and highlights exactly which file to open, which lines to delete, and which lines to insert — directly in VS Code.</p>
+  <div class="hero-cta">
+    <a href="#install" class="btn-primary">Install Free</a>
+  </div>
+</div>
+
+<div style="max-width:680px;margin:0 auto;padding:0 2rem 4rem;">
+  <div class="demo-block">
+    <div class="demo-label">ChatGPT response</div>
+    <p>In your <code>index.html</code> file, replace the console.log with a logger call and update the port to use the variable:</p>
+    <br>
+    <div>// C:\Projects\Aura\index.html</div>
+    <div class="del">- console.log("Server starting...");</div>
+    <div class="ins">+ logger.info(`Port ${port}`);</div>
+    <div class="demo-divider"></div>
+    <div><span class="badge">Guidance ✓</span> <code>index.html</code> → sent to VS Code</div>
+    <br>
+    <div class="demo-label">VS Code — index.html</div>
+    <div class="demo-row">
+      <div class="demo-col">
+        <div style="color:#aaa">main.js</div>
+        <div style="background:#fff3cd;padding:2px 4px;border-radius:3px;"><strong>index.html ← go here</strong></div>
       </div>
-      <div class="mockup-editor">
-        <div class="mockup-editor-label">VS Code — index.html</div>
-        <div class="mockup-tab-bar">
-          <div class="mockup-tab" style="color:rgba(255,255,255,0.3)">
-            <span style="width:7px;height:7px;border-radius:2px;background:#1D9E75;display:inline-block"></span>
-            main.js
-          </div>
-          <div class="mockup-tab glow">
-            <span style="width:7px;height:7px;border-radius:2px;background:#534AB7;display:inline-block"></span>
-            index.html ← go here
-          </div>
-        </div>
-        <div class="mockup-line"><span class="mockup-ln">4</span><span class="mockup-lc" style="color:rgba(255,255,255,0.3)">  const port = 3000;</span></div>
-        <div class="mockup-line line-del"><span class="mockup-ln">5</span><span class="mockup-lc">  console.log("Server...");</span></div>
-        <div class="mockup-line line-ins"><span class="mockup-ln">6</span><span class="mockup-lc">  logger.info(`Port ${port}`);</span></div>
-        <div class="mockup-line"><span class="mockup-ln">7</span><span class="mockup-lc" style="color:rgba(255,255,255,0.3)"></span></div>
-        <div class="mockup-line line-edit"><span class="mockup-ln">8</span><span class="mockup-lc" style="color:#AFA9EC">  app.listen(3000, cb);</span></div>
-        <div style="margin-top:12px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.25);display:flex;align-items:center;gap:6px">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#1D9E75" stroke-width="1"/><path d="M3 5l1.5 1.5L7 3.5" stroke="#1D9E75" stroke-width="1" stroke-linecap="round"/></svg>
-          Press Ctrl+S to clear highlights
-        </div>
+      <div class="demo-col">
+        <div style="color:#aaa">4 &nbsp; const port = 3000;</div>
+        <div style="color:#c0392b;text-decoration:line-through">5 &nbsp; console.log("Server...");</div>
+        <div style="color:#27ae60">6 &nbsp; logger.info(`Port ${port}`);</div>
+        <div style="color:#aaa">7</div>
+        <div style="color:#aaa">8 &nbsp; app.listen(3000, cb);</div>
       </div>
     </div>
+    <div class="demo-divider"></div>
+    <div style="font-family:-apple-system,sans-serif;font-size:0.78rem;color:#888">Press Ctrl+S to clear highlights</div>
   </div>
-</section>
+</div>
 
-<!-- PROBLEM -->
-<section class="problem" id="problem">
+<section id="problem">
+  <p style="font-size:1.4rem;font-weight:700;text-align:center;margin-bottom:0.5rem;">The Problem</p>
+  <p style="text-align:center;color:#666;margin-bottom:2.5rem;">"The AI told me what to change — but I have no idea which file to open or where to find the line."</p>
+  <p style="max-width:680px;margin:0 auto 2.5rem;text-align:center;color:#555;">You're not a senior developer. You use AI to build things. The AI gives you code — but then leaves you staring at 20 open tabs, trying to figure out where exactly to paste it. Guidance is the missing bridge.</p>
   <div class="problem-grid">
-    <div>
-      <div class="section-label">The Problem</div>
-      <div class="problem-quote">"The AI told me what to change — but I have no idea which file to open or where to find the line."</div>
-      <p class="problem-desc">You're not a senior developer. You use AI to build things. The AI gives you code — but then leaves you staring at 20 open tabs, trying to figure out where exactly to paste it. Guidance is the missing bridge.</p>
-    </div>
-    <div class="problem-visual">
-      <div class="pain-card">
-        <span class="pain-icon">😩</span>
-        <div>
-          <div class="pain-title">Wrong file, wasted time</div>
-          <div class="pain-desc">Editing the wrong version of a file, then wondering why the change did nothing.</div>
-        </div>
-      </div>
-      <div class="pain-card">
-        <span class="pain-icon">🔍</span>
-        <div>
-          <div class="pain-title">Ctrl+F hunting through 500 lines</div>
-          <div class="pain-desc">The AI says "find the body tag" — but your index.html is 600 lines long.</div>
-        </div>
-      </div>
-      <div class="pain-card">
-        <span class="pain-icon">💥</span>
-        <div>
-          <div class="pain-title">Breaking things by guessing</div>
-          <div class="pain-desc">Pasting code in the wrong place and breaking something that was already working.</div>
-        </div>
-      </div>
-    </div>
+    <div class="problem-card"><div class="icon">😩</div><h3>Wrong file, wasted time</h3><p>Editing the wrong version of a file, then wondering why the change did nothing.</p></div>
+    <div class="problem-card"><div class="icon">🔍</div><h3>Ctrl+F hunting through 500 lines</h3><p>The AI says "find the body tag" — but your index.html is 600 lines long.</p></div>
+    <div class="problem-card"><div class="icon">💥</div><h3>Breaking things by guessing</h3><p>Pasting code in the wrong place and breaking something that was already working.</p></div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="how" id="how">
-  <div class="how-inner">
-    <div class="section-label">How it works</div>
-    <h2 class="section-title">Four steps. Zero guesswork.</h2>
+<section id="how" style="background:#fafafa;max-width:100%;padding:5rem 2rem;">
+  <div style="max-width:960px;margin:0 auto;">
+    <h2>Four steps. Zero guesswork.</h2>
     <p class="section-sub">Guidance runs silently in the background. You just code normally — it handles the navigation.</p>
-    <div class="how-steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-icon">🤖</div>
-        <div class="step-title">Ask your AI</div>
-        <div class="step-desc">Ask ChatGPT, Claude, Grok or Gemini for a code change as you normally would.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-icon">👁️</div>
-        <div class="step-title">Guidance detects it</div>
-        <div class="step-desc">The browser extension automatically reads the AI response and identifies the file and lines to change.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-icon">✨</div>
-        <div class="step-title">VS Code lights up</div>
-        <div class="step-desc">The right file opens. The tab glows. Red lines show what to delete, green shows what to insert.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">04</div>
-        <div class="step-icon">💾</div>
-        <div class="step-title">Save to clear</div>
-        <div class="step-desc">Make the edit. Press Ctrl+S. The highlights disappear and the patch is marked done.</div>
-      </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><div class="step-icon">🤖</div><h3>Ask your AI</h3><p>Ask ChatGPT, Claude, Grok or Gemini for a code change as you normally would.</p></div>
+      <div class="step"><div class="step-num">02</div><div class="step-icon">👁️</div><h3>Guidance detects it</h3><p>The browser extension automatically reads the AI response and identifies the file and lines to change.</p></div>
+      <div class="step"><div class="step-num">03</div><div class="step-icon">✨</div><h3>VS Code lights up</h3><p>The right file opens. The tab glows. Red lines show what to delete, green shows what to insert.</p></div>
+      <div class="step"><div class="step-num">04</div><div class="step-icon">💾</div><h3>Save to clear</h3><p>Make the edit. Press Ctrl+S. The highlights disappear and the patch is marked done.</p></div>
     </div>
   </div>
 </section>
 
-<!-- FEATURES -->
-<section class="features" id="features">
-  <div class="features-inner">
-    <div class="section-label">Features</div>
-    <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
-    <div class="features-grid">
-      <div class="feat-card">
-        <div class="feat-icon">🎯</div>
-        <div class="feat-title">Tab glow + arrow indicator</div>
-        <div class="feat-desc">The exact VS Code tab you need to open glows amber. If it's off screen, an arrow shows you which direction to scroll.</div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🔴</div>
-        <div class="feat-title">Line-level highlights</div>
-        <div class="feat-desc">Red for delete. Green for insert. Amber for edit. Every line that needs changing is marked inline in your code.</div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🧠</div>
-        <div class="feat-title">Works with 4 AI platforms</div>
-        <div class="feat-desc">ChatGPT, Claude, Grok and Gemini — Guidance watches all of them simultaneously and picks up code instructions automatically.</div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🎨</div>
-        <div class="feat-title">Project colour coding</div>
-        <div class="feat-desc">Assign colours to projects so your VS Code tabs are always colour-coded by project. Never edit the wrong project's files again.</div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">📋</div>
-        <div class="feat-title">Patch queue</div>
-        <div class="feat-desc">All pending changes sit in a queue. Work through them one by one. Each patch shows the file, the lines, and the AI's original instruction.</div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">⚡</div>
-        <div class="feat-title">Auto-clear on save</div>
-        <div class="feat-desc">When you save the file with Ctrl+S, the highlights clear automatically and the patch is marked done. No manual cleanup.</div>
-      </div>
-    </div>
+<section id="features">
+  <h2>Everything you need. Nothing you don't.</h2>
+  <p class="section-sub">All features are free during the beta.</p>
+  <div class="features-grid">
+    <div class="feature"><div class="ficon">🎯</div><h3>Tab glow + arrow indicator</h3><p>The exact VS Code tab you need glows amber. If it's off screen, an arrow shows which direction to scroll.</p></div>
+    <div class="feature"><div class="ficon">🔴</div><h3>Line-level highlights</h3><p>Red for delete. Green for insert. Amber for edit. Every line that needs changing is marked inline.</p></div>
+    <div class="feature"><div class="ficon">🧠</div><h3>Works with 4 AI platforms</h3><p>ChatGPT, Claude, Grok and Gemini — watches all of them simultaneously and picks up code instructions automatically.</p></div>
+    <div class="feature"><div class="ficon">🎨</div><h3>Project colour coding</h3><p>Assign colours to projects so your VS Code tabs are always colour-coded by project.</p></div>
+    <div class="feature"><div class="ficon">📋</div><h3>Patch queue</h3><p>All pending changes sit in a queue. Work through them one by one — each patch shows the file, lines, and original instruction.</p></div>
+    <div class="feature"><div class="ficon">⚡</div><h3>Auto-clear on save</h3><p>When you save with Ctrl+S, highlights clear automatically and the patch is marked done. No manual cleanup.</p></div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="pricing" id="pricing">
-  <div class="pricing-inner">
-    <div class="section-label">Pricing</div>
-    <h2 class="section-title">Simple. Once-off. Yours forever.</h2>
-    <p class="section-sub">No subscription. No monthly fees. Pay once, use forever.</p>
-    <div class="pricing-cards">
-      <div class="price-card">
-        <div class="price-name">FREE</div>
-        <div class="price-amount">R0</div>
-        <div class="price-period">forever</div>
-        <ul class="price-features">
-          <li>Patch detection on all AI platforms</li>
-          <li>Line highlights in VS Code</li>
-          <li>5 project colours</li>
-          <li>1 shade variant per colour</li>
-          <li class="off">Auto AI detection</li>
-          <li class="off">Priority support</li>
-        </ul>
-        <a href="#install" class="price-btn free-btn">Install Free</a>
-      </div>
-      <div class="price-card featured">
-        <div class="price-name">PRO</div>
-        <div class="price-amount">R199</div>
-        <div class="price-period">once-off · yours forever</div>
-        <ul class="price-features">
-          <li>Everything in Free</li>
-          <li>10 project colours</li>
-          <li>3 shade variants per colour</li>
-          <li>Auto AI detection</li>
-          <li>Priority support</li>
-        </ul>
-        <a href="#" class="price-btn pro-btn" onclick="openModal();return false">Get Pro — R199</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- INSTALL -->
-<section class="install" id="install">
-  <div class="install-inner">
-    <div class="section-label">Installation</div>
-    <h2 class="section-title">Up and running in 5 minutes.</h2>
+<section id="install" style="background:#fafafa;max-width:100%;padding:5rem 2rem;">
+  <div style="max-width:960px;margin:0 auto;">
+    <h2>Up and running in 5 minutes.</h2>
     <p class="section-sub">Two things to install — the browser extension and the VS Code extension.</p>
 
-    <!-- SYSTEM REQUIREMENTS BOX -->
-    <div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:24px 28px;margin-top:40px;margin-bottom:8px">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:16px">💻</span> System Requirements
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-        <div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Operating System</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:2px">Windows 10 or 11</div>
-          <div style="font-size:12px;color:#888">Mac / iOS — coming soon</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Browser</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:2px">Microsoft Edge or Chrome</div>
-          <div style="font-size:12px;color:#888">Firefox not supported yet</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Storage Required</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:2px">~800MB free space</div>
-          <div style="font-size:12px;color:#888">VS Code ~350MB · Node.js ~300MB · Extensions ~5MB</div>
-        </div>
+    <div class="req-box">
+      <h3>💻 System Requirements</h3>
+      <div class="req-grid">
+        <dl class="req-item"><dt>Operating System</dt><dd>Windows 10 or 11<br><small style="color:#aaa">Mac / iOS — coming soon</small></dd></dl>
+        <dl class="req-item"><dt>Browser</dt><dd>Microsoft Edge or Chrome<br><small style="color:#aaa">Firefox not supported yet</small></dd></dl>
+        <dl class="req-item"><dt>Storage Required</dt><dd>~800MB free space<br><small style="color:#aaa">VS Code ~350MB · Node.js ~300MB · Extensions ~5MB</small></dd></dl>
       </div>
     </div>
 
     <div class="install-tabs">
-      <button class="install-tab active" onclick="switchTab('browser')">1. Browser Extension</button>
-      <button class="install-tab" onclick="switchTab('vscode')">2. VS Code Extension</button>
+      <button class="install-tab active" onclick="showTab('browser', this)">1. Browser Extension</button>
+      <button class="install-tab" onclick="showTab('vscode', this)">2. VS Code Extension</button>
     </div>
 
-    <div class="install-panel active" id="tab-browser">
-      <div class="install-steps">
-        <div class="install-step">
-          <div class="install-step-num">1</div>
-          <div>
-            <div class="install-step-title">Download the browser extension</div>
-            <div class="install-step-desc">Download the Guidance browser extension zip file. File size is approximately 20KB.</div>
-            <a href="https://github.com/KelTech-ZA/Guidance/raw/main/BROWSER-guidance-extension.zip" class="download-btn">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5M2.5 11.5h9" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
-              Download Browser Extension
-            </a>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">2</div>
-          <div>
-            <div class="install-step-title">Unzip the file</div>
-            <div class="install-step-desc">Right-click the downloaded zip → <code>Extract All</code> → <code>Extract</code>. Move the extracted folder somewhere permanent like <code>C:\Users\YourName\guidance-browser</code>. Do not delete this folder after installing.</div>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">3</div>
-          <div>
-            <div class="install-step-title">Load into Edge or Chrome</div>
-            <div class="install-step-desc">Open <code>edge://extensions</code> or <code>chrome://extensions</code> → Toggle <code>Developer mode</code> ON → Click <code>Load unpacked</code> → Select the extracted folder → Click <code>Select Folder</code>.</div>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">4</div>
-          <div>
-            <div class="install-step-title">Pin Guidance to your toolbar</div>
-            <div class="install-step-desc">Click the puzzle piece 🧩 icon in your browser toolbar → Find <strong>Guidance — Visual Coding Co-pilot</strong> → Click the pin icon. The Guidance icon will now appear in your toolbar permanently.</div>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">5</div>
-          <div>
-            <div class="install-step-title">Activate Pro (if purchased)</div>
-            <div class="install-step-desc">Click the Guidance icon in your toolbar → Go to the <strong>Settings</strong> tab → Paste your licence key in the <strong>Activate Pro</strong> box → Click <strong>Activate</strong>. Pro features unlock immediately.</div>
-          </div>
-        </div>
-      </div>
+    <div class="install-panel active" id="panel-browser">
+      <ol class="step-list">
+        <li><div><h3>Download the browser extension</h3><p>Download the Guidance browser extension zip file. File size is approximately 20KB.</p><a href="https://github.com/KelTech-ZA/Guidance/raw/main/BROWSER-guidance-extension.zip" class="dl-btn">Download Browser Extension</a></div></li>
+        <li><div><h3>Unzip the file</h3><p>Right-click the downloaded zip → <code>Extract All</code> → <code>Extract</code>. Move the extracted folder somewhere permanent like <code>C:\Users\YourName\guidance-browser</code>. Do not delete this folder after installing.</p></div></li>
+        <li><div><h3>Load into Edge or Chrome</h3><p>Open <code>edge://extensions</code> or <code>chrome://extensions</code> → Toggle <strong>Developer mode</strong> ON → Click <strong>Load unpacked</strong> → Select the extracted folder → Click <strong>Select Folder</strong>.</p></div></li>
+        <li><div><h3>Pin Guidance to your toolbar</h3><p>Click the puzzle piece 🧩 icon in your browser toolbar → Find <strong>Guidance — Visual Coding Co-pilot</strong> → Click the pin icon. The Guidance icon will now appear in your toolbar permanently.</p></div></li>
+      </ol>
     </div>
 
-    <div class="install-panel" id="tab-vscode">
-      <div class="install-steps">
-        <div class="install-step">
-          <div class="install-step-num">1</div>
-          <div>
-            <div class="install-step-title">Install VS Code (required)</div>
-            <div class="install-step-desc">Guidance requires VS Code as your code editor — it cannot work with Notepad++ or other editors. Download VS Code free from <code>code.visualstudio.com</code>. It requires approximately 350MB of free space.</div>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">2</div>
-          <div>
-            <div class="install-step-title">Install Node.js (required)</div>
-            <div class="install-step-desc">Download the LTS version from <code>nodejs.org</code>. Choose the Windows installer. This requires approximately 300MB of free space. If you already have Node.js installed, skip this step.</div>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">3</div>
-          <div>
-            <div class="install-step-title">Download the VS Code extension</div>
-            <div class="install-step-desc">Download the Guidance VS Code extension zip file below. File size is approximately 10KB.</div>
-            <a href="https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" class="download-btn">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5M2.5 11.5h9" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
-              Download VS Code Extension
-            </a>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">4</div>
-          <div>
-            <div class="install-step-title">Install the VS Code extension</div>
-            <div class="install-step-desc">Unzip the downloaded file. Open VS Code → press <code>Ctrl+`</code> to open the Terminal → run these two commands one at a time:<br><br>
-            <code>xcopy /e /i /y "C:\Users\YourName\Downloads\VSCODE-guidance-extension-NEW" "C:\Users\YourName\.vscode\extensions\guidance-vscode"</code><br><br>
-            Then: <code>cd "%USERPROFILE%\.vscode\extensions\guidance-vscode" && npm install ws</code><br><br>
-            Close and reopen VS Code. You'll see <strong>Guidance: ready</strong> in the bottom status bar.</div>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">5</div>
-          <div>
-            <div class="install-step-title">Open your project in VS Code</div>
-            <div class="install-step-desc">In VS Code: <code>File → Open Folder</code> → select your project folder. The status bar at the bottom will show <strong>Guidance: browser connected</strong> once you also have the browser extension running on a ChatGPT, Claude, Grok or Gemini tab.</div>
-          </div>
-        </div>
-        <div class="install-step">
-          <div class="install-step-num">6</div>
-          <div>
-            <div class="install-step-title">Assign project colours (optional)</div>
-            <div class="install-step-desc">To colour-code your project tabs: press <code>Ctrl+Shift+P</code> in VS Code → type <code>Guidance: Assign Colour</code> → select your project → pick a colour. Your VS Code title bar and tabs will update immediately.</div>
-          </div>
-        </div>
-      </div>
+    <div class="install-panel" id="panel-vscode">
+      <ol class="step-list">
+        <li><div><h3>Install VS Code (required)</h3><p>Guidance requires VS Code — it cannot work with Notepad++ or other editors. Download VS Code free from <code>code.visualstudio.com</code>. Requires approximately 350MB of free space.</p></div></li>
+        <li><div><h3>Install Node.js (required)</h3><p>Download the LTS version from <code>nodejs.org</code>. Choose the Windows installer. Requires approximately 300MB of free space. Skip if already installed.</p></div></li>
+        <li><div><h3>Download the VS Code extension</h3><p>Download the Guidance VS Code extension zip file below. File size is approximately 10KB.</p><a href="https://github.com/KelTech-ZA/Guidance/raw/main/VSCODE-guidance-extension.zip" class="dl-btn">Download VS Code Extension</a></div></li>
+        <li><div><h3>Install the VS Code extension</h3><p>Unzip the downloaded file. Open VS Code → press <code>Ctrl+`</code> to open the Terminal → run these two commands one at a time:</p><p style="margin-top:0.5rem"><code>xcopy /e /i /y "C:\Users\YourName\Downloads\VSCODE-guidance-extension-NEW" "C:\Users\YourName\.vscode\extensions\guidance-vscode"</code></p><p style="margin-top:0.5rem">Then: <code>cd "%USERPROFILE%\.vscode\extensions\guidance-vscode" &amp;&amp; npm install ws</code></p><p style="margin-top:0.5rem">Close and reopen VS Code. You'll see <strong>Guidance: ready</strong> in the bottom status bar.</p></div></li>
+        <li><div><h3>Open your project in VS Code</h3><p>In VS Code: <code>File → Open Folder</code> → select your project folder. The status bar will show <strong>Guidance: browser connected</strong> once you also have the browser extension running on a ChatGPT, Claude, Grok or Gemini tab.</p></div></li>
+        <li><div><h3>Assign project colours (optional)</h3><p>Press <code>Ctrl+Shift+P</code> in VS Code → type <code>Guidance: Assign Colour</code> → select your project → pick a colour. Your VS Code title bar and tabs will update immediately.</p></div></li>
+      </ol>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
-<section class="faq" id="faq">
-  <div class="faq-inner">
-    <div class="section-label">FAQ</div>
-    <h2 class="section-title">Common questions</h2>
-    <div class="faq-list">
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Does Guidance work on Mac or iOS? <span class="arrow">▼</span></button>
-        <div class="faq-a">Not yet. Guidance currently supports Windows 10 and Windows 11 only. Mac and iOS support is planned for a future release. We'll announce it on this page when it's available.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Do I need to download VS Code? Can I use Notepad++ instead? <span class="arrow">▼</span></button>
-        <div class="faq-a">Yes — VS Code is required. Guidance cannot work with Notepad++ or other editors because it needs to communicate directly with the editor to show highlights. VS Code is free and opens all the same file types as Notepad++. Switching takes about 5 minutes and your files stay exactly the same.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">How much storage space do I need? <span class="arrow">▼</span></button>
-        <div class="faq-a">You need approximately 800MB of free space total: VS Code (~350MB), Node.js (~300MB), and the Guidance extensions themselves (~5MB combined). If you already have VS Code and Node.js installed, you only need 5MB for the extensions themselves.</div>
-      </div>
-        <div class="faq-a">No. Guidance is built specifically for people who use AI to write code but struggle with where to apply the changes. You don't need to understand the code — Guidance just shows you exactly where to paste it.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Does it work with Notepad++ or other editors? <span class="arrow">▼</span></button>
-        <div class="faq-a">Currently Guidance requires VS Code as the editor because it needs to communicate with the editor directly to show highlights. VS Code is free and opens all the same file types as Notepad++. We recommend switching to VS Code — it takes about 5 minutes.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Which AI platforms does it work with? <span class="arrow">▼</span></button>
-        <div class="faq-a">Guidance currently supports ChatGPT (chatgpt.com), Claude (claude.ai), Grok (grok.com) and Gemini (gemini.google.com). It works with all of them simultaneously — switch between AI tools freely.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Is my code sent anywhere? <span class="arrow">▼</span></button>
-        <div class="faq-a">No. Guidance works entirely on your local machine. The browser extension and VS Code extension communicate directly over a local WebSocket connection — your code never leaves your computer.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">What is the Pro licence key? How does it work? <span class="arrow">▼</span></button>
-        <div class="faq-a">After purchasing Pro, you'll receive a unique licence key by email. Open the Guidance browser extension → Settings tab → paste your key → click Activate. Pro features unlock immediately. The key is yours forever — no subscription or renewal.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">What payment methods are accepted? <span class="arrow">▼</span></button>
-        <div class="faq-a">Payments are processed securely through Payfast. We accept all major credit and debit cards, EFT, and SnapScan. All transactions are in South African Rand (ZAR).</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">I lost my licence key email. Can I get it resent? <span class="arrow">▼</span></button>
-        <div class="faq-a">Yes. Email us at support@capitlrsa.com with the email address you used to purchase and we'll resend your key immediately.</div>
-      </div>
+<section id="faq">
+  <h2>Common questions</h2>
+  <details><summary>Does Guidance work on Mac or iOS?</summary><p>Not yet. Guidance currently supports Windows 10 and Windows 11 only. Mac and iOS support is planned for a future release.</p></details>
+  <details><summary>Do I need to download VS Code? Can I use Notepad++ instead?</summary><p>Yes — VS Code is required. Guidance cannot work with Notepad++ or other editors because it needs to communicate directly with the editor to show highlights. VS Code is free and opens all the same file types as Notepad++. Switching takes about 5 minutes and your files stay exactly the same.</p></details>
+  <details><summary>How much storage space do I need?</summary><p>You need approximately 800MB of free space total: VS Code (~350MB), Node.js (~300MB), and the Guidance extensions themselves (~5MB combined). If you already have VS Code and Node.js installed, you only need 5MB.</p></details>
+  <details><summary>Do I need to understand coding to use Guidance?</summary><p>No. Guidance is built specifically for people who use AI to write code but struggle with where to apply the changes. You don't need to understand the code — Guidance just shows you exactly where to paste it.</p></details>
+  <details><summary>Which AI platforms does it work with?</summary><p>Guidance currently supports ChatGPT (chatgpt.com), Claude (claude.ai), Grok (grok.com) and Gemini (gemini.google.com). It works with all of them simultaneously.</p></details>
+  <details><summary>Is my code sent anywhere?</summary><p>No. Guidance works entirely on your local machine. The browser extension and VS Code extension communicate directly over a local WebSocket connection — your code never leaves your computer.</p></details>
+</section>
+
+<section id="reviews" style="background:#fafafa;max-width:100%;padding:5rem 2rem;">
+  <div style="max-width:960px;margin:0 auto;">
+    <h2>What users are saying.</h2>
+    <p class="section-sub">Early testers share their experience with Guidance.</p>
+    <p style="color:#aaa;font-size:0.9rem;">No reviews yet — be the first to leave one below!</p>
+    <div class="review-form" style="margin-top:2rem;">
+      <h3>Leave a review</h3>
+      <p style="font-size:0.88rem;color:#666;margin-bottom:1.25rem;">Tried Guidance? Tell us what you think — good or bad. Your feedback shapes the product.</p>
+      <div class="form-row"><label>Your name</label><input type="text" placeholder="Jane Smith" /></div>
+      <div class="form-row"><label>Rating</label><div class="star-group">⭐⭐⭐⭐⭐</div></div>
+      <div class="form-row"><label>Your review</label><textarea placeholder="What did you think?"></textarea></div>
+      <button class="btn-submit" onclick="document.querySelector('.review-success').style.display='block'">Submit Review →</button>
+      <p class="review-success">✓ Thank you for your review! It will appear shortly.</p>
     </div>
   </div>
 </section>
 
-<!-- REVIEWS -->
-<section style="background:var(--paper);padding:96px 48px" id="reviews">
-  <div style="max-width:900px;margin:0 auto">
-    <div class="section-label">Reviews</div>
-    <h2 class="section-title">What users are saying.</h2>
-    <p class="section-sub" style="margin-bottom:24px">Early testers share their experience with Guidance.</p>
-
-    <!-- Average rating summary -->
-    <div id="reviewSummary" style="display:flex;align-items:center;gap:8px;margin-bottom:32px;font-family:'Syne',sans-serif"></div>
-
-    <!-- Loading state -->
-    <div id="reviewsLoading" style="text-align:center;padding:24px;color:#aaa;font-size:13px">
-      Loading reviews…
-    </div>
-
-    <!-- Submitted reviews display -->
-    <div id="reviewsList" style="display:flex;flex-direction:column;gap:16px;margin-bottom:48px">
-      <!-- Reviews load here -->
-      <div id="noReviews" style="text-align:center;padding:32px;background:#fff;border:1px solid var(--border);border-radius:14px;color:#aaa;font-size:14px">
-        No reviews yet — be the first to leave one below!
-      </div>
-    </div>
-
-    <!-- Submit a review form -->
-    <div style="background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:32px">
-      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Leave a review</h3>
-      <p style="font-size:13px;color:#888;margin-bottom:24px">Tried Guidance? Tell us what you think — good or bad. Your feedback shapes the product.</p>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div>
-          <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Your name</label>
-          <input type="text" id="reviewName" placeholder="e.g. Lungelo M."
-            style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s"
-            onfocus="this.style.borderColor='#534AB7'" onblur="this.style.borderColor='rgba(14,13,26,0.1)'">
-        </div>
-        <div>
-          <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Rating</label>
-          <div id="starRating" style="display:flex;gap:6px;padding:8px 0">
-            <span class="star" data-val="1" onclick="setRating(1)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
-            <span class="star" data-val="2" onclick="setRating(2)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
-            <span class="star" data-val="3" onclick="setRating(3)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
-            <span class="star" data-val="4" onclick="setRating(4)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
-            <span class="star" data-val="5" onclick="setRating(5)" style="font-size:24px;cursor:pointer;opacity:0.3;transition:opacity .15s">★</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px">
-        <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Your review</label>
-        <textarea id="reviewText" placeholder="What did you think of Guidance? Was the install easy? Did it help you find code changes faster?"
-          style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:100px;transition:border-color .15s"
-          onfocus="this.style.borderColor='#534AB7'" onblur="this.style.borderColor='rgba(14,13,26,0.1)'"></textarea>
-      </div>
-
-      <div style="margin-bottom:16px">
-        <label style="display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase">Which tier are you on?</label>
-        <div style="display:flex;gap:10px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
-            <input type="radio" name="reviewTier" value="Free" checked style="accent-color:#534AB7"> Free
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
-            <input type="radio" name="reviewTier" value="Pro" style="accent-color:#534AB7"> Pro
-          </label>
-        </div>
-      </div>
-
-      <div id="reviewError" style="font-size:12px;color:#A32D2D;margin-bottom:10px;display:none"></div>
-      <div id="reviewSuccess" style="font-size:13px;color:#085041;background:#EAF3DE;padding:10px 14px;border-radius:8px;margin-bottom:10px;display:none">
-        ✓ Thank you for your review! It will appear shortly.
-      </div>
-
-      <button onclick="submitReview()"
-        style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:12px 28px;border-radius:9px;border:none;background:#534AB7;color:#fff;cursor:pointer;transition:background .2s"
-        onmouseover="this.style.background='#3C3489'" onmouseout="this.style.background='#534AB7'">
-        Submit Review →
-      </button>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
 <footer>
-  <div class="footer-logo">
-    <div style="width:28px;height:28px;border-radius:7px;background:#534AB7;display:flex;align-items:center;justify-content:center">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="white" stroke-width="1.3"/><path d="M4.5 7h5M7 4.5v5" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
-    </div>
-    Guidance
-  </div>
-  <div class="footer-tagline">Visual Coding Co-pilot — by CAPITL</div>
+  <p style="font-weight:700;margin-bottom:0.5rem;">Guidance</p>
+  <p style="color:#aaa;font-size:0.8rem;margin-bottom:1rem;">Visual Coding Co-pilot — by CAPITL</p>
   <div class="footer-links">
     <a href="#how">How it works</a>
     <a href="#install">Install</a>
-    <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
     <a href="https://www.capitlrsa.com">capitlrsa.com</a>
     <a href="mailto:support@capitlrsa.com">Support</a>
   </div>
-  <div class="footer-copy">© 2026 CAPITL. All rights reserved. · Guidance is a product of CAPITL RSA.</div>
+  <p>© 2026 CAPITL. All rights reserved. · Guidance is a product of CAPITL RSA.</p>
 </footer>
 
-<!-- PAYMENT MODAL -->
-<div class="modal-overlay" id="payModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">×</button>
-    <div id="modal-form-view">
-      <h3>Get Guidance Pro</h3>
-      <p class="modal-sub">R199 once-off · Yours forever · Licence key by email</p>
-      <div class="form-row">
-        <label>First name</label>
-        <input type="text" id="pay-first" placeholder="Lungelo">
-      </div>
-      <div class="form-row">
-        <label>Last name</label>
-        <input type="text" id="pay-last" placeholder="Mkhize">
-      </div>
-      <div class="form-row">
-        <label>Email address</label>
-        <input type="email" id="pay-email" placeholder="you@email.com">
-      </div>
-      <div class="modal-error" id="modal-error">Please fill in all fields with a valid email.</div>
-      <button class="modal-submit" onclick="initiatePayment()">Pay R199 with Payfast →</button>
-      <p class="modal-note">Secure payment via Payfast · EFT, Card, SnapScan accepted<br>Your licence key will be emailed instantly after payment</p>
-    </div>
-    <div class="modal-success" id="modal-success-view">
-      <div class="modal-success-icon">🎉</div>
-      <h4>Redirecting to Payfast...</h4>
-      <p>You'll be redirected to complete your payment securely. Your licence key will be emailed to you immediately after.</p>
-    </div>
-  </div>
-</div>
-
 <script>
-const BACKEND = 'https://guidance-backend-396822769279.us-central1.run.app';
-
-// ── Reviews ──────────────────────────────────────────────────────────────
-let currentRating = 0;
-
-function setRating(val) {
-  currentRating = val;
-  document.querySelectorAll('.star').forEach((s, i) => {
-    s.style.opacity = i < val ? '1' : '0.3';
-    s.style.color = i < val ? '#EF9F27' : 'inherit';
-  });
+function showTab(name, btn) {
+  document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
 }
-
-async function submitReview() {
-  const name = document.getElementById('reviewName').value.trim();
-  const text = document.getElementById('reviewText').value.trim();
-  const tier = document.querySelector('input[name="reviewTier"]:checked').value;
-  const errEl = document.getElementById('reviewError');
-  const successEl = document.getElementById('reviewSuccess');
-  const btn = document.querySelector('#reviews button');
-
-  errEl.style.display = 'none';
-  successEl.style.display = 'none';
-
-  if (!name) { errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
-  if (!text || text.length < 10) { errEl.textContent = 'Please write a review of at least 10 characters.'; errEl.style.display = 'block'; return; }
-  if (currentRating === 0) { errEl.textContent = 'Please select a star rating.'; errEl.style.display = 'block'; return; }
-
-  btn.textContent = 'Submitting…';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(`${BACKEND}/reviews/submit`, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ name, review_text: text, rating: currentRating, tier })
-    });
-    
-    if (!res.ok) throw new Error('Server error ' + res.status);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-
-    document.getElementById('reviewName').value = '';
-    document.getElementById('reviewText').value = '';
-    setRating(0);
-    successEl.textContent = '✓ Thank you! Your review has been submitted and will appear once approved.';
-    successEl.style.display = 'block';
-
-  } catch(e) {
-    console.error('Review submit error:', e);
-    errEl.textContent = 'Could not submit — please email your review to support@capitlrsa.com';
-    errEl.style.display = 'block';
-  }
-
-  btn.textContent = 'Submit Review →';
-  btn.disabled = false;
-}
-
-async function loadReviews() {
-  try {
-    const res = await fetch(`${BACKEND}/reviews`, {
-      method: 'GET',
-      mode: 'cors',
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('Failed');
-    const data = await res.json();
-    renderReviews(data.reviews || []);
-  } catch(e) {
-    console.error('Load reviews error:', e);
-    renderReviews([]);
-  }
-}
-
-function renderReviews(reviews) {
-  const list = document.getElementById('reviewsList');
-  const noReviews = document.getElementById('noReviews');
-  const loading = document.getElementById('reviewsLoading');
-  if (loading) loading.style.display = 'none';
-
-  // Remove old cards
-  list.querySelectorAll('.review-card').forEach(e => e.remove());
-
-  if (reviews.length === 0) {
-    noReviews.style.display = 'block';
-    return;
-  }
-  noReviews.style.display = 'none';
-
-  // Average rating
-  const avg = (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1);
-  const summaryEl = document.getElementById('reviewSummary');
-  if (summaryEl) {
-    summaryEl.innerHTML = `<span style="font-size:28px;font-weight:800;font-family:'Syne',sans-serif">${avg}</span>
-      <span style="color:#EF9F27;font-size:20px;margin:0 6px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span>
-      <span style="font-size:13px;color:#888">${reviews.length} review${reviews.length !== 1 ? 's' : ''}</span>`;
-  }
-
-  reviews.forEach(r => {
-    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-    const date = new Date(r.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
-    const card = document.createElement('div');
-    card.className = 'review-card';
-    card.style.cssText = 'background:#fff;border:1px solid rgba(14,13,26,0.08);border-radius:14px;padding:20px 24px;opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s';
-    card.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:50%;background:#EEEDFE;color:#534AB7;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            ${r.name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700">${r.name}</div>
-            <div style="font-size:11px;color:#aaa">${date} · ${r.tier} tier</div>
-          </div>
-        </div>
-        <div style="color:#EF9F27;font-size:18px;letter-spacing:2px">${stars}</div>
-      </div>
-      <div style="font-size:14px;color:#444;line-height:1.6">${r.review_text}</div>
-    `;
-    list.appendChild(card);
-    setTimeout(() => { card.style.opacity = '1'; card.style.transform = 'none'; }, 50);
-  });
-}
-
-// Load reviews on page load
-loadReviews();
-
-// ── Tab switcher ────────────────────────────────────────────────────────
-function switchTab(t) {
-  document.querySelectorAll('.install-tab').forEach((b,i) => {
-    b.classList.toggle('active', (i===0&&t==='browser')||(i===1&&t==='vscode'));
-  });
-  document.getElementById('tab-browser').classList.toggle('active', t==='browser');
-  document.getElementById('tab-vscode').classList.toggle('active', t==='vscode');
-}
-
-// ── FAQ ─────────────────────────────────────────────────────────────────
-function toggleFaq(btn) {
-  const item = btn.closest('.faq-item');
-  const wasOpen = item.classList.contains('open');
-  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-  if (!wasOpen) item.classList.add('open');
-}
-
-// ── Payment modal ────────────────────────────────────────────────────────
-function openModal() {
-  document.getElementById('payModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  document.getElementById('payModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.getElementById('payModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-async function initiatePayment() {
-  const firstName = document.getElementById('pay-first').value.trim();
-  const lastName  = document.getElementById('pay-last').value.trim();
-  const email     = document.getElementById('pay-email').value.trim();
-  const errEl     = document.getElementById('modal-error');
-
-  if (!firstName || !email || !email.includes('@')) {
-    errEl.style.display = 'block';
-    return;
-  }
-  errEl.style.display = 'none';
-
-  const btn = document.querySelector('.modal-submit');
-  btn.textContent = 'Preparing payment...';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch(`${BACKEND}/payfast/initiate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, firstName, lastName })
-    });
-    const data = await res.json();
-
-    if (data.error) throw new Error(data.error);
-
-    // Show success view
-    document.getElementById('modal-form-view').style.display = 'none';
-    document.getElementById('modal-success-view').style.display = 'block';
-
-    // Build and submit Payfast form
-    setTimeout(() => {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = data.payfastUrl;
-      Object.entries(data.params).forEach(([k, v]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = k;
-        input.value = v;
-        form.appendChild(input);
-      });
-      document.body.appendChild(form);
-      form.submit();
-    }, 1500);
-
-  } catch(e) {
-    btn.textContent = 'Pay R199 with Payfast →';
-    btn.disabled = false;
-    errEl.textContent = 'Something went wrong. Please try again.';
-    errEl.style.display = 'block';
-  }
-}
-
-// ── Scroll animations ────────────────────────────────────────────────────
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.style.opacity = '1';
-      e.target.style.transform = 'translateY(0)';
-    }
-  });
-}, { threshold: 0.1 });
-
-document.querySelectorAll('.step, .feat-card, .pain-card, .install-step, .price-card').forEach(el => {
-  el.style.opacity = '0';
-  el.style.transform = 'translateY(16px)';
-  el.style.transition = 'opacity .5s ease, transform .5s ease';
-  observer.observe(el);
-});
 </script>
+
 </body>
 </html>
